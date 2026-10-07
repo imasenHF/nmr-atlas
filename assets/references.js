@@ -1,7 +1,7 @@
 import{$,$$,state,solventData,impurityData,mediaOrder,solventMeta,impurityFormula,parseShift,pubchemImage}from'./core.js';
 
-const fullRanges={1H:[12,0],13C:[220,0]};
-const plotRanges={1H:[...fullRanges['1H']],13C:[...fullRanges['13C']]};
+const fullRanges={'1H':[12,0],'13C':[220,0]};
+const plotRanges={'1H':[...fullRanges['1H']],'13C':[...fullRanges['13C']]};
 
 function setupStructure(img,name){
   img.hidden=false;img.src=pubchemImage(name);
