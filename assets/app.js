@@ -1,6 +1,6 @@
-import{$,state,loadData}from'./core.js';
-import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,initPalette,restoreUrl,setField,renderComparison}from'./periodic.js';
-import{initSolvents,initImpurities}from'./references.js';
+import{$,state,loadData}from'./core.js?v=20261008-runtimefix';
+import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,initPalette,restoreUrl,setField,renderComparison}from'./periodic.js?v=20261008-runtimefix';
+import{initSolvents,initImpurities}from'./references.js?v=20261008-runtimefix';
 try{
   await loadData();
   restoreUrl();
