@@ -1,0 +1,197 @@
+
+  for (let index = 0; index <= 10; index += 1) {
+    const tick = document.createElement('span');
+    tick.className = 'axis-tick';
+    tick.style.left = `${index * 10}%`;
+    tick.textContent = (max * (1 - index / 10)).toFixed(nucleus === '1H' ? 1 : 0);
+    root.appendChild(tick);
+  }
+  entries.forEach((entry, index) => {
+    const value = shiftSortValue(entry.shift);
+    if (!Number.isFinite(value)) return;
+    const x = (max - value) / max * 100;
+    const line = document.createElement('i');
+    line.className = 'stick';
+    line.style.left = `${Math.max(0, Math.min(100, x))}%`;
+    line.style.height = `${58 + index % 4 * 12}%`;
+    line.dataset.label = entry.shift;
+    line.title = entry.j_hz ? `δ ${entry.shift}; J ${entry.j_hz} Hz` : `δ ${entry.shift}`;
+    root.appendChild(line);
+  });
+  if (nucleus === '1H' && hod) {
+    const value = shiftSortValue(hod);
+    if (Number.isFinite(value)) {
+      const line = document.createElement('i');
+      line.className = 'stick hod';
+      line.style.left = `${Math.max(0, Math.min(100, (max - value) / max * 100))}%`;
+      line.style.height = '38%';
+      line.dataset.label = 'HOD';
+      line.title = `HOD/HDO δ ${hod}`;
+      root.appendChild(line);
+    }
+  }
+}
+
+function renderSolventViewer() {
+  const solvent = solventData[state.solventIndex];
+  if (!solvent) return;
+  $('#solventName').textContent = solvent.name;
+  $('#solventFormula').innerHTML = formulaHtml(solvent.formula);
+  $('#solventResidual').innerHTML = `<b>Residual <sup>1</sup>H species</b> · ${chemicalTextHtml(solvent.residual)}`;
+  setupStructure($('#solventStructure'), $('#solventStructureFallback'), solvent.structure_query || solvent.name, solvent.fallback_query || solvent.name);
+  const entries = state.solventNucleus === '1H' ? solvent.h1 : solvent.c13;
+  $('#solventPlotNucleus').textContent = state.solventNucleus === '1H' ? '¹H' : '¹³C';
+  makeStickPlot(entries, solvent.hod, state.solventNucleus);
+  const list = $('#solventSignalList');
+  list.innerHTML = '';
+  entries.forEach(entry => {
+    const item = document.createElement('span');
+    item.className = 'signal-pill';
+    item.innerHTML = `<b>δ ${escapeHtml(entry.shift)}</b>${entry.j_hz && entry.j_hz !== 'NA' ? `<small>J ${escapeHtml(entry.j_hz)} Hz</small>` : ''}`;
+    list.appendChild(item);
+  });
+  if (state.solventNucleus === '1H' && solvent.hod) {
+    const item = document.createElement('span');
+    item.className = 'signal-pill hod-pill';
+    item.innerHTML = `<b>HOD/HDO δ ${escapeHtml(solvent.hod)}</b>`;
+    list.appendChild(item);
+  }
+}
+
+function initSolvents() {
+  renderSolventList();
+  renderSolventViewer();
+  $$('#solventNucleusToggle button').forEach(button => button.addEventListener('click', () => {
+    $$('#solventNucleusToggle button').forEach(item => item.classList.remove('active'));
+    button.classList.add('active');
+    state.solventNucleus = button.dataset.nucleus;
+    renderSolventViewer();
+  }));
+}
+
+function impurityGroups() {
+  const query = $('#impuritySearch').value.trim().toLowerCase();
+  const groups = new Map();
+  impurityData.filter(row => row.nucleus === state.impurityNucleus).forEach(row => {
+    const haystack = `${row.compound} ${aliases[row.compound] || ''}`.toLowerCase();
+    if (query && !haystack.includes(query)) return;
+    if (!groups.has(row.compound)) groups.set(row.compound, []);
+    groups.get(row.compound).push(row);
+  });
+  return [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+}
+
+function signalEntriesHtml(rows) {
+  if (!rows.length) return '<span class="empty-signal">—</span>';
+  return [...rows].sort((a, b) => shiftSortValue(b.shift) - shiftSortValue(a.shift)).map(row => {
+    const site = row.site ? `<span class="signal-site">${escapeHtml(row.site)}</span>` : '';
+    const mult = row.multiplicity ? `<small>${escapeHtml(row.multiplicity)}</small>` : '';
+    return `<div class="signal-entry"><div><b>${escapeHtml(row.shift)}</b>${site}</div>${mult}</div>`;
+  }).join('');
+}
+
+function renderImpurities() {
+  const root = $('#impurityGroups');
+  root.innerHTML = '';
+  const groups = impurityGroups();
+  for (const [name, rows] of groups) {
+    const row = document.createElement('article');
+    row.className = 'impurity-row';
+    const compound = document.createElement('div');
+    compound.className = 'compound-cell';
+    compound.dataset.compound = name;
+    compound.innerHTML = `<img class="compound-thumb" alt="" hidden><div class="compound-text"><strong>${escapeHtml(name)}</strong><span class="compound-formula">—</span></div>`;
+    row.appendChild(compound);
+    for (const medium of mediaOrder) {
+      const cell = document.createElement('div');
+      const entries = rows.filter(record => record.medium === medium);
+      cell.className = `medium-cell${entries.length ? '' : ' empty'}`;
+      cell.innerHTML = signalEntriesHtml(entries);
+      row.appendChild(cell);
+    }
+    root.appendChild(row);
+  }
+  if (!groups.length) root.innerHTML = '<div class="empty-state impurity-empty">未找到匹配杂质。</div>';
+  observeCompoundCells();
+}
+
+function structureName(name) {
+  return aliases[name] || name;
+}
+
+async function fetchCompoundMeta(name) {
+  if (compoundMetaCache.has(name)) return compoundMetaCache.get(name);
+  const promise = (async () => {
+    const query = structureName(name);
+    const url = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(query)}/property/MolecularFormula,ConnectivitySMILES/JSON`;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`PubChem ${response.status}`);
+    const json = await response.json();
+    const property = json?.PropertyTable?.Properties?.[0];
+    if (!property) throw new Error('No PubChem property result');
+    return {
+      cid: property.CID,
+      formula: property.MolecularFormula || '',
+      smiles: property.ConnectivitySMILES || ''
+    };
+  })().catch(() => null);
+  compoundMetaCache.set(name, promise);
+  return promise;
+}
+
+async function hydrateCompoundCell(cell) {
+  if (cell.dataset.hydrated === '1') return;
+  cell.dataset.hydrated = '1';
+  const name = cell.dataset.compound;
+  const meta = await fetchCompoundMeta(name);
+  const formula = cell.querySelector('.compound-formula');
+  const image = cell.querySelector('.compound-thumb');
+  if (meta) {
+    formula.innerHTML = formulaHtml(meta.formula);
+    cell.title = meta.smiles ? `SMILES: ${meta.smiles}` : '';
+    image.hidden = false;
+    image.src = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/${meta.cid}/PNG?record_type=2d&image_size=small`;
+    image.onload = () => { cell.classList.remove('no-image'); };
+    image.onerror = () => { image.hidden = true; cell.classList.add('no-image'); };
+  } else {
+    formula.textContent = 'formula unavailable';
+    image.hidden = false;
+    image.src = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(structureName(name))}/PNG?record_type=2d&image_size=small`;
+    image.onload = () => { cell.classList.remove('no-image'); };
+    image.onerror = () => { image.hidden = true; cell.classList.add('no-image'); };
+  }
+}
+
+function observeCompoundCells() {
+  if (compoundObserver) compoundObserver.disconnect();
+  compoundObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      hydrateCompoundCell(entry.target);
+      compoundObserver.unobserve(entry.target);
+    });
+  }, { rootMargin: '280px 0px' });
+  $$('.compound-cell[data-compound]').forEach(cell => compoundObserver.observe(cell));
+}
+
+function initImpurities() {
+  renderImpurities();
+  $('#impuritySearch').addEventListener('input', renderImpurities);
+  $$('#impurityNucleusToggle button').forEach(button => button.addEventListener('click', () => {
+    $$('#impurityNucleusToggle button').forEach(item => item.classList.remove('active'));
+    button.classList.add('active');
+    state.impurityNucleus = button.dataset.nucleus;
+    renderImpurities();
+  }));
+}
+
+function updateLayoutName() {
+  const width = window.innerWidth;
+  $('#layoutName').textContent = width >= 1660 ? 'Full layout' : width >= 1050 ? 'Compact layout' : 'Sectioned layout';
+}
+
+function updateUrl() {
+  if (!/^https?:$/.test(location.protocol)) return;
+  const params = new URLSearchParams();
+  params.set('field', state.field < 0.1 ? state.field.toFixed(6) : state.field.toFixed(5));
+  if (state.pins.length) params.set('nuclei', state.pins.map(pin => pin.key).join(','));
