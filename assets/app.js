@@ -89,7 +89,7 @@ function isotopeButton(e,i){
   d.dataset.search=`${i.mass}${e.symbol} ${e.name} ${e.symbol}`.toLowerCase();
   d.innerHTML=`<span class="mass"><sup>${i.mass||''}</sup>${e.symbol}</span><span class="meta">I = ${i.spin||'—'}</span><span class="meta">${i.abundance||'—'}%</span><span class="meta gamma">γ ${i.gamma||'—'}</span><span class="freq">${i.gamma?frequencyText(frequencyMhz(i.gamma)):'—'}</span>`;
   d.title=`${i.mass}${e.symbol}: I=${i.spin||'n/a'}, abundance ${i.abundance||'n/a'}%, γ/2π ${i.gamma||'n/a'} MHz/T`;
-  d.onclick=()=>togglePin(e,i);return d;
+  if(spinClass==='unknown'){d.disabled=true;d.setAttribute('aria-disabled','true')}else d.onclick=()=>togglePin(e,i);return d;
 }
 function renderPeriodic(){
   const root=$('#periodicTable');root.innerHTML='';
@@ -115,15 +115,15 @@ function renderSelected(){
 function applyFilter(){
   const q=state.query.trim().toLowerCase();
   $$('.element-block').forEach(b=>{
-    const elementText=b.dataset.search;let visibleCount=0;let queryHit=!q||elementText.includes(q);
+    const elementText=b.dataset.search;let visibleCount=0;let activeMatchCount=0;let queryHit=!q||elementText.includes(q);
     b.querySelectorAll('.isotope-cell').forEach(c=>{
       const spinPass=state.filter==='all'||c.dataset.spinClass===state.filter;
       let queryPass=true;
       if(q&&/\d/.test(q))queryPass=c.dataset.search.includes(q);
       else if(q)queryPass=elementText.includes(q)||c.dataset.search.includes(q);
-      const show=spinPass&&queryPass;c.classList.toggle('filtered-out',!show);if(show){visibleCount++;queryHit=true}
+      const show=spinPass&&queryPass;c.classList.toggle('filtered-out',!show);if(show){visibleCount++;if(c.dataset.spinClass!=='unknown')activeMatchCount++;queryHit=true}
     });
-    const noMatch=visibleCount===0;b.classList.toggle('no-match',noMatch);b.classList.toggle('query-match',!!q&&queryHit&&!noMatch);b.classList.toggle('query-no-match',!!q&&!queryHit);
+    const noMatch=state.filter==='all'?activeMatchCount===0:visibleCount===0;b.classList.toggle('no-match',noMatch);b.classList.toggle('query-match',!!q&&queryHit&&!noMatch);b.classList.toggle('query-no-match',!!q&&!queryHit);
   });
 }
 function initFilters(){
