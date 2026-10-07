@@ -1,0 +1,163 @@
+const gammaH = 42.57747892;
+const MHZ_MIN = 0.001;
+const MHZ_MAX = 2000;
+const mediaOrder = ['CDCl3', 'acetone-d6', 'DMSO-d6', 'CD3CN', 'CD3OD', 'D2O'];
+const mediaLabels = {
+  CDCl3: 'CDCl₃',
+  'acetone-d6': 'acetone-d₆',
+  'DMSO-d6': 'DMSO-d₆',
+  CD3CN: 'CD₃CN',
+  CD3OD: 'CD₃OD',
+  D2O: 'D₂O'
+};
+
+const solventMeta = {
+  'Acetic Acid-d4': { formula:'C2D4O2', residual:'partially protonated isotopologues (e.g. CD3COOH / CHD2COOD)', structure_query:'acetic acid-d4', fallback_query:'acetic acid' },
+  'Acetone-d6': { formula:'C3D6O', residual:'acetone-d5H (C3HD5O)', structure_query:'acetone-d6', fallback_query:'acetone' },
+  'Acetonitrile-d3': { formula:'C2D3N', residual:'acetonitrile-d2H (C2HD2N)', structure_query:'acetonitrile-d3', fallback_query:'acetonitrile' },
+  'Benzene-d6': { formula:'C6D6', residual:'benzene-d5H (C6HD5)', structure_query:'benzene-d6', fallback_query:'benzene' },
+  'Chloroform-d': { formula:'CDCl3', residual:'CHCl3', structure_query:'chloroform-d', fallback_query:'chloroform' },
+  'Cyclohexane-d12': { formula:'C6D12', residual:'cyclohexane-d11H (C6HD11)', structure_query:'cyclohexane-d12', fallback_query:'cyclohexane' },
+  'Deuterium Oxide': { formula:'D2O', residual:'HDO (HOD)', structure_query:'deuterium oxide', fallback_query:'water' },
+  'N,N-Dimethylformamide-d7': { formula:'C3D7NO', residual:'partially protonated DMF isotopologues', structure_query:'N,N-dimethylformamide-d7', fallback_query:'dimethylformamide' },
+  'Dimethyl Sulfoxide-d6': { formula:'C2D6OS', residual:'DMSO-d5H (C2HD5OS)', structure_query:'dimethyl sulfoxide-d6', fallback_query:'dimethyl sulfoxide' },
+  '1,4-Dioxane-d8': { formula:'C4D8O2', residual:'1,4-dioxane-d7H (C4HD7O2)', structure_query:'1,4-dioxane-d8', fallback_query:'1,4-dioxane' },
+  'Ethanol-d6': { formula:'C2D6O', residual:'partially protonated ethanol isotopologues', structure_query:'ethanol-d6', fallback_query:'ethanol' },
+  'Methanol-d4': { formula:'CD4O', residual:'partially protonated isotopologues (e.g. CHD2OD / CD3OH)', structure_query:'methanol-d4', fallback_query:'methanol' },
+  'Methylene Chloride-d2': { formula:'CD2Cl2', residual:'CHDCl2', structure_query:'dichloromethane-d2', fallback_query:'dichloromethane' },
+  'Pyridine-d5': { formula:'C5D5N', residual:'pyridine-d4H (C5HD4N)', structure_query:'pyridine-d5', fallback_query:'pyridine' },
+  '1,1,2,2-Tetrachloroethane-d2': { formula:'C2D2Cl4', residual:'C2HDCl4', structure_query:'1,1,2,2-tetrachloroethane-d2', fallback_query:'1,1,2,2-tetrachloroethane' },
+  'Tetrahydrofuran-d8': { formula:'C4D8O', residual:'THF-d7H (C4HD7O)', structure_query:'tetrahydrofuran-d8', fallback_query:'tetrahydrofuran' },
+  'Toluene-d8': { formula:'C7D8', residual:'partially protonated toluene isotopologues', structure_query:'toluene-d8', fallback_query:'toluene' },
+  'Trifluoroacetic Acid-d': { formula:'C2DF3O2', residual:'CF3COOH (C2HF3O2)', structure_query:'trifluoroacetic acid-d', fallback_query:'trifluoroacetic acid' },
+  'Trifluoroethanol-d3': { formula:'C2D3F3O', residual:'partially protonated trifluoroethanol isotopologues', structure_query:'2,2,2-trifluoroethanol-d3', fallback_query:'2,2,2-trifluoroethanol' }
+};
+
+const aliases = {
+  MIBK: 'methyl isobutyl ketone',
+  DMPU: '1,3-dimethyl-3,4,5,6-tetrahydro-2(1H)-pyrimidinone',
+  MTBE: 'methyl tert-butyl ether',
+  ETBE: 'ethyl tert-butyl ether',
+  TAME: 'tert-amyl methyl ether',
+  CPME: 'cyclopentyl methyl ether',
+  '2-MeTHF': '2-methyltetrahydrofuran',
+  'L-ethyl lactate': 'ethyl L-lactate',
+  'iso-propanol': 'isopropanol',
+  'iso-butanol': 'isobutanol',
+  'iso-amyl alcohol': 'isoamyl alcohol',
+  'iso-amyl acetate': 'isoamyl acetate',
+  'iso-butyl acetate': 'isobutyl acetate',
+  'iso-propyl acetate': 'isopropyl acetate',
+  'ethyl benzene': 'ethylbenzene',
+  'methyl ethyl ketone': '2-butanone',
+  xylenes: 'xylene'
+};
+
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
+const state = {
+  field: 9.39464,
+  pins: [],
+  filter: 'all',
+  query: '',
+  solventIndex: 0,
+  solventNucleus: '1H',
+  impurityNucleus: '1H',
+  inspectorSymbol: null,
+  inspectorKey: null
+};
+let elements = [];
+let solventData = [];
+let impurityData = [];
+const presets = [1, 5, 20, 43, 60, 80, 100, 300, 400, 500, 600, 800, 1000, 1200];
+const compoundMetaCache = new Map();
+let compoundObserver = null;
+
+const supDigits = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+const subDigits = '₀₁₂₃₄₅₆₇₈₉';
+const sup = value => String(value ?? '').replace(/\d/g, d => supDigits[Number(d)]);
+const nuclideLabel = (mass, symbol) => mass ? `${sup(mass)}${symbol}` : symbol;
+const toNumber = value => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+};
+const trimFixed = (value, decimals = 2) => Number(value).toFixed(decimals).replace(/\.00$/, '').replace(/(\.\d*[1-9])0+$/, '$1');
+const compactNumber = value => {
+  if (value === '' || value == null) return '—';
+  const n = Number(value);
+  if (!Number.isFinite(n)) {
+    const text = String(value);
+    return /^radioactive$/i.test(text) ? 'Rad.' : text;
+  }
+  const a = Math.abs(n);
+  if (a > 0 && a < 0.01) return n.toExponential(2).replace('e+', 'e');
+  return trimFixed(n, 2);
+};
+const formulaHtml = formula => String(formula || '').replace(/(\d+)/g, '<sub>$1</sub>');
+const chemicalTextHtml = text => escapeHtml(text).replace(/(\d+)/g, '<sub>$1</sub>');
+const frequencyMhz = gamma => {
+  const g = toNumber(gamma);
+  return g == null ? null : Math.abs(g) * state.field;
+};
+const comparisonFrequencyText = mhz => {
+  if (mhz == null || !Number.isFinite(mhz)) return '—';
+  if (mhz >= 1000) return `${(mhz / 1000).toFixed(2)} GHz`;
+  if (mhz >= 1) return `${mhz.toFixed(2)} MHz`;
+  if (mhz >= 0.001) return `${(mhz * 1000).toFixed(2)} kHz`;
+  return `${(mhz * 1e6).toFixed(2)} Hz`;
+};
+const tableFrequencyScale = () => {
+  const h = state.field * gammaH;
+  if (h >= 1) return { unit: 'MHz', factor: 1 };
+  if (h >= 0.001) return { unit: 'kHz', factor: 1000 };
+  return { unit: 'Hz', factor: 1e6 };
+};
+const tableFrequencyValue = gamma => {
+  const mhz = frequencyMhz(gamma);
+  if (mhz == null) return '—';
+  const { factor } = tableFrequencyScale();
+  const value = mhz * factor;
+  if (value > 0 && Math.abs(value) < 0.01) return value.toExponential(1).replace('e+', 'e');
+  return Number(value).toFixed(2);
+};
+const mhzToSlider = mhz => Math.round((Math.log10(mhz) - Math.log10(MHZ_MIN)) / (Math.log10(MHZ_MAX) - Math.log10(MHZ_MIN)) * 1000);
+const sliderToMhz = value => 10 ** (Math.log10(MHZ_MIN) + (Number(value) / 1000) * (Math.log10(MHZ_MAX) - Math.log10(MHZ_MIN)));
+const shiftSortValue = shift => {
+  const match = String(shift || '').match(/-?\d+(?:\.\d+)?/);
+  return match ? Number(match[0]) : -Infinity;
+};
+const escapeHtml = text => String(text ?? '').replace(/[&<>"]/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char]));
+
+async function loadJson(path) {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+  return response.json();
+}
+
+async function loadData() {
+  try {
+    const parts = await Promise.all([1, 2, 3, 4].map(async number => {
+      const response = await fetch(`data/nmr-data.part${number}`);
+      if (!response.ok) throw new Error(`data part ${number}: HTTP ${response.status}`);
+      return response.text();
+    }));
+    if (!('DecompressionStream' in window)) throw new Error('Browser lacks DecompressionStream support');
+    const base64 = parts.join('').trim();
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+    const payload = JSON.parse(await new Response(stream).text());
+    elements = payload.isotopes.map(element => {
+      const fullCol = Math.round(Number(element.x) / 2.618) + 1;
+      const y = Number(element.y);
+      let series = 'main';
+      let period = null;
+      if (y > -14) period = Math.round(-y / 2.618) + 1;
+      else if (Math.abs(y + 16) < 0.6) { series = 'lanthanide'; period = 6; }
+      else { series = 'actinide'; period = 7; }
+      const group = series === 'main' ? fullCol : null;
+      const block = series !== 'main' ? 'f' : group <= 2 ? 's' : group <= 12 ? 'd' : 'p';
+      return { ...element, full_col: fullCol, period, series, group, block };
+    });
+    solventData = payload.solvents.map(solvent => {
