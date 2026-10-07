@@ -351,7 +351,30 @@ Compound 单元显示：
 - 页尾 NMR Atlas 也必须可点击。
 - 页尾品牌链接增加明确 hover 文字变色效果。
 
-## 12. 待检查项
+## 12. 第二轮实现状态
+
+已实施：
+
+- 周期表方格移除 I 与 γ/2π，仅保留 isotope、abundance、frequency、relative sensitivity；
+- 周期表外增加 CELL DATA 图例，I 与 γ/2π 改由 hover inspector 查看；
+- 元素符号和 isotope 字号降低，避免多核素元素溢出；
+- 增加 Wave / Atlas / Mineral / Mono 四套周期表配色，可即时切换并保存在浏览器；
+- 元素/核素详情改为约 340 ms hover 触发，离开后短延迟关闭；
+- 点击 isotope 直接加入/移出 Nuclei Comparison；点击元素主体添加当前筛选条件下天然丰度最高的可用 NMR isotope；
+- Full layout 的 f block 与主表之间改为约 0.5 个方格边长的间距；分段布局各 block 也采用约 0.5 cell 的垂直节奏；
+- Nuclei Comparison 移除 Add nucleus 下拉框、Add 和 Clear 控件，只保留 Δδ / ppm，默认值改为 1；
+- Solvent structure 改用较大 PubChem 图并通过裁剪缩放和 multiply 混合减弱白底/白边；
+- Solvent chemical-shift plot 支持滚轮围绕指针缩放，双击恢复完整范围；
+- Impurity 标题区删除空泛说明；
+- Impurity matrix 增加字段图例：δ / ppm、assignment、multiplicity/J；
+- Impurity solvent 表头增大；
+- Impurity signal 改为 shift / assignment / multiplicity 三列同行布局，扩大 solvent 列宽并取消内部固定高度滚动；
+- Impurity compound structure 放大并减弱白底/白边；
+- 页头 plastocyanin. 与 NMR Atlas 已拆为独立链接；
+- 页尾 NMR Atlas 已增加独立链接，品牌链接增加 hover 变色；
+- Pages workflow 增加 JavaScript syntax check，在部署前检查 core / periodic / references / app 四个模块。
+
+## 13. 待检查项
 
 - 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
 - impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
