@@ -43,5 +43,5 @@ export const mhzToSlider=mhz=>Math.round((Math.log10(mhz)-Math.log10(MHZ_MIN))/(
 export const sliderToMhz=v=>10**(Math.log10(MHZ_MIN)+(Number(v)/1000)*(Math.log10(MHZ_MAX)-Math.log10(MHZ_MIN)));
 export const parseShift=s=>{const m=String(s||'').match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):null};
 export const structureName=name=>aliases[name]||name;
-export const pubchemImage=name=>`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(structureName(name))}/PNG?record_type=2d&image_size=small`;
+export const pubchemImage=name=>`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(structureName(name))}/PNG?record_type=2d&image_size=large`;
 export async function loadData(){const parts=await Promise.all([1,2,3,4].map(async n=>{const r=await fetch(`data/nmr-data.part${n}`);if(!r.ok)throw new Error(`data part ${n}: HTTP ${r.status}`);return r.text()}));if(!('DecompressionStream' in window))throw new Error('Browser lacks DecompressionStream support');const bin=atob(parts.join('').trim()),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));setData(JSON.parse(await new Response(stream).text()))}
