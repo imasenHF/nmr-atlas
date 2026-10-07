@@ -1,7 +1,7 @@
 import{$,$$,state,elements,gammaH,MHZ_MIN,MHZ_MAX,groupMapSP,fmt,displayNumber,compactNumber,frequencyMhz,currentTableUnit,frequencyInUnit,frequencyText,mhzToSlider,sliderToMhz,nuclideLabel,parseNumber}from'./core.js?v=20261008-runtimefix';
 
 const presets=[1,5,20,43,60,80,100,300,400,500,600,800,1000,1200];
-const fullPosition=e=>{const col=Math.round(Number(e.x)/2.618)+1,y=Number(e.y);let row;if(y>-14)row=Math.round(-y/2.618)+2;else if(y>-17.5)row=10;else row=11;return{col,row,period:row-1}};
+const fullPosition=e=>{const col=Math.round(Number(e.x)/2.618)+1,y=Number(e.y);let row;if(y>-14)row=Math.round(-y/2.618)+2;else if(y>-17.5)row=9;else row=10;return{col,row,period:row-1}};
 const layoutMode=()=>innerWidth>=1550?'full':innerWidth>=760?'split':'sectioned';
 const spinClass=i=>i.spin==='1/2'?'half':i.spin?'other':'unknown';
 const keyFor=(e,i)=>`${i.mass}${e.symbol}`;
@@ -97,7 +97,7 @@ function renderFull(root){
   const g=document.createElement('div');g.className='periodic-full-grid';
   const w=Math.min(1680,$('#periodicScroll').clientWidth||1680),cell=Math.min(92,Math.max(76,(w-68)/18));
   g.style.gridTemplateColumns=`repeat(18,${cell}px)`;
-  g.style.gridTemplateRows=`16px repeat(7,${cell}px) ${cell*.5}px repeat(2,${cell}px)`;
+  g.style.gridTemplateRows=`16px repeat(6,${cell}px) ${cell*.5}px repeat(2,${cell}px)`;
   g.style.width=`${18*cell+68}px`;
   for(let n=1;n<=18;n++){const x=document.createElement('div');x.className='group-number';x.style.gridColumn=n;x.style.gridRow=1;x.textContent=n;g.appendChild(x)}
   elements.forEach(e=>g.appendChild(makeElement(e,fullPosition(e))));
@@ -182,7 +182,10 @@ export function renderComparison(){
 }
 export function initComparison(){$('#deltaPpmInput').oninput=renderComparison}
 export function initPalette(){
-  const saved=localStorage.getItem('nmr-atlas-palette')||'wave';
+  const allowed=new Set(['wave','jacs','muted','pastel']);
+  const stored=localStorage.getItem('nmr-atlas-palette');
+  const saved=allowed.has(stored)?stored:'wave';
+  if(stored!==saved)localStorage.setItem('nmr-atlas-palette',saved);
   document.body.dataset.palette=saved;
   $$('#paletteSwitch button').forEach(b=>{
     b.classList.toggle('active',b.dataset.palette===saved);
