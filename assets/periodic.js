@@ -161,7 +161,7 @@ export function initFilters(){
   $('#nucleusSearch').oninput=e=>{state.query=e.target.value;applyFilter()};
 }
 export function renderInspector(){
-  if(!state.inspector||$('#isotopeInspector').hidden)return;
+  if(!state.inspector)return;
   const{element:e,active}=state.inspector;
   const body=e.isotopes.filter(i=>i.spin).map(i=>{
     const k=keyFor(e,i),f=frequencyMhz(i.gamma),pin=state.pins.some(p=>p.key===k);
