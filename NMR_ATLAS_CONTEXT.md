@@ -26,17 +26,17 @@ NMR Atlas 是 plastocyanin Workshop 下的独立 NMR 交互参考工具。
 
 ### 2.1 信息保留
 
-周期表不删减原 `table400.tex` 中已经展示的主要核素信息。元素单元继续包含：
+周期表保留原 `table400.tex` 中的主要科学信息，但把信息分为“方格常驻信息”和“悬浮信息”。
+
+元素/核素方格常驻显示：
 
 - 元素原子序数、元素符号、元素名、常见 chemical-shift range；
 - 核素质量数；
-- 核自旋 I；
 - 天然丰度；
-- γ/2π；
 - 当前磁场下的 Larmor frequency；
 - relative sensitivity / receptivity。
 
-不采用“为了适配窄屏而删除 γ、frequency、relative sensitivity”的方案。
+`I` 与 `γ/2π` 不再常驻方格，放在周期表外图例、hover inspector 和 Nuclei Comparison 中。信息仍保留，只调整显示层级。
 
 ### 2.2 数值精度和单位
 
@@ -88,11 +88,11 @@ Spin filter 必须作用于核素级：
 - 完全没有符合条件核素的元素整体弱化；
 - 无有效核自旋数据的占位项不混入 `I > 1/2`。
 
-### 2.6 元素/核素局部放大
+### 2.6 元素/核素局部信息
 
-点击元素或核素时提供局部 inspector，不放大整张周期表。
+元素或核素 hover 约 300–400 ms 后显示局部 inspector，不放大整张周期表；离开元素和 inspector 后短延迟关闭。
 
-Inspector 应清晰显示该元素所有可用核素的：
+Inspector 清晰显示该元素所有可用核素的：
 
 - isotope；
 - spin；
@@ -101,9 +101,7 @@ Inspector 应清晰显示该元素所有可用核素的：
 - current frequency；
 - relative sensitivity。
 
-可在 inspector 中添加或移除 Nuclei Comparison。
-
-宽屏优先利用周期表上方或周期表自身的空白区域；窄屏使用独立面板或 bottom sheet。
+点击 isotope 直接加入/移出 Nuclei Comparison；点击元素主体添加当前自旋筛选条件下天然丰度最高的可用 NMR isotope。
 
 ## 3. Nuclei Comparison
 
@@ -119,11 +117,11 @@ Inspector 应清晰显示该元素所有可用核素的：
 
 原独立 ppm / Hz converter 合并到 Nuclei Comparison。
 
-比较区提供一个公共 `Δδ / ppm` 输入，同一 Δδ 对所有已选核种计算 Δν：
+比较区只保留一个公共 `Δδ / ppm` 输入，默认值为 1；同一 Δδ 对所有已选核种计算 Δν：
 
 `Δν / Hz = Δδ / ppm × ν0 / MHz`
 
-除周期表点击添加外，应提供可搜索/选择的 Add nucleus 控件，使更多核种可直接加入比较。
+核种只通过周期表点击加入比较；比较区不再提供 Add nucleus 下拉框或 Add 按钮。
 
 ## 4. 磁场与频率范围
 
@@ -282,7 +280,7 @@ Compound 单元显示：
 
 已实施：
 
-- 页面品牌副标题已改为 NMR Atlas；
+- 页面品牌副标题已改为 NMR Atlas，plastocyanin. 与 NMR Atlas 使用独立链接；
 - 周期表保留原有核素参数，元素区/核素区按约 38.2% : 61.8% 布局；
 - 宽屏采用完整 18 group，较窄屏将 s/p、d、f 区块拆分显示；
 - 周期表数值精度统一，frequency 单位移到表外；
