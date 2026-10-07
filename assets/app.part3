@@ -1,0 +1,205 @@
+
+    const noMatch = state.filter === 'all' ? visibleKnown === 0 : visibleAny === 0;
+    block.classList.toggle('no-match', noMatch);
+    block.classList.toggle('query-match', Boolean(query) && queryHit && !noMatch);
+    block.classList.toggle('query-no-match', Boolean(query) && !queryHit);
+  });
+}
+
+function initFilters() {
+  $$('#spinFilters button').forEach(button => button.addEventListener('click', () => {
+    $$('#spinFilters button').forEach(item => item.classList.remove('active'));
+    button.classList.add('active');
+    state.filter = button.dataset.filter;
+    applyFilter();
+  }));
+  $('#nucleusSearch').addEventListener('input', event => {
+    state.query = event.target.value;
+    applyFilter();
+  });
+}
+
+function findElement(symbol) {
+  return elements.find(element => element.symbol === symbol);
+}
+
+function openInspector(symbol, key, anchor) {
+  state.inspectorSymbol = symbol;
+  state.inspectorKey = key;
+  renderInspector();
+  const panel = $('#isotopeInspector');
+  panel.hidden = false;
+  if (window.innerWidth <= 720) return;
+  requestAnimationFrame(() => {
+    const rect = anchor.getBoundingClientRect();
+    const width = Math.min(430, window.innerWidth - 32);
+    const panelHeight = panel.offsetHeight || 320;
+    let left = rect.right + 12;
+    if (left + width > window.innerWidth - 16) left = rect.left - width - 12;
+    left = Math.max(16, Math.min(left, window.innerWidth - width - 16));
+    let top = rect.top;
+    if (top + panelHeight > window.innerHeight - 16) top = window.innerHeight - panelHeight - 16;
+    top = Math.max(16, top);
+    panel.style.left = `${left}px`;
+    panel.style.top = `${top}px`;
+  });
+}
+
+function closeInspector() {
+  const panel = $('#isotopeInspector');
+  panel.hidden = true;
+  state.inspectorSymbol = null;
+  state.inspectorKey = null;
+}
+
+function renderInspector() {
+  const element = findElement(state.inspectorSymbol);
+  if (!element) return;
+  const body = $('#inspectorContent');
+  const rows = element.isotopes.map(isotope => {
+    const key = `${isotope.mass}${element.symbol}`;
+    const selected = key === state.inspectorKey ? ' selected' : '';
+    const pinned = state.pins.some(pin => pin.key === key);
+    return `<div class="inspector-isotope${selected}">
+      <div class="inspector-nuclide">${nuclideLabel(isotope.mass, element.symbol)}</div>
+      <dl>
+        <div><dt>Spin</dt><dd>${escapeHtml(isotope.spin || '—')}</dd></div>
+        <div><dt>Natural abundance</dt><dd>${compactNumber(isotope.abundance)}${isotope.abundance !== '' ? ' %' : ''}</dd></div>
+        <div><dt>γ/2π</dt><dd>${compactNumber(isotope.gamma)}${isotope.gamma ? ' MHz T⁻¹' : ''}</dd></div>
+        <div><dt>Frequency</dt><dd>${isotope.gamma ? comparisonFrequencyText(frequencyMhz(isotope.gamma)) : '—'}</dd></div>
+        <div><dt>Relative sensitivity</dt><dd>${compactNumber(isotope.receptivity)}</dd></div>
+      </dl>
+      ${isotope.spin && isotope.gamma ? `<button class="inspector-pin${pinned ? ' active' : ''}" data-key="${escapeHtml(key)}">${pinned ? 'Remove from comparison' : 'Add to comparison'}</button>` : ''}
+    </div>`;
+  }).join('');
+  body.innerHTML = `<div class="inspector-title"><span class="inspector-symbol">${escapeHtml(element.symbol)}</span><span><b>${escapeHtml(element.name)}</b><small>Z = ${element.atomic_number}${element.shift_range ? ` · shift range ~${escapeHtml(element.shift_range)} ppm` : ''}</small></span></div><div class="inspector-isotopes">${rows}</div>`;
+  body.querySelectorAll('.inspector-pin').forEach(button => button.addEventListener('click', () => {
+    const isotope = element.isotopes.find(item => `${item.mass}${element.symbol}` === button.dataset.key);
+    if (isotope) togglePin(element, isotope);
+  }));
+}
+
+function pinObject(element, isotope) {
+  return { key: `${isotope.mass}${element.symbol}`, symbol: element.symbol, name: element.name, atomic_number: element.atomic_number, ...isotope };
+}
+
+function togglePin(element, isotope) {
+  const key = `${isotope.mass}${element.symbol}`;
+  const index = state.pins.findIndex(pin => pin.key === key);
+  if (index >= 0) state.pins.splice(index, 1);
+  else state.pins.push(pinObject(element, isotope));
+  renderFrequencies();
+  renderComparison();
+  if (state.inspectorSymbol) renderInspector();
+  updateUrl();
+}
+
+function addPinByKey(key) {
+  for (const element of elements) {
+    const isotope = element.isotopes.find(item => `${item.mass}${element.symbol}` === key);
+    if (isotope) {
+      if (!state.pins.some(pin => pin.key === key)) state.pins.push(pinObject(element, isotope));
+      renderFrequencies();
+      renderComparison();
+      updateUrl();
+      return;
+    }
+  }
+}
+
+function renderNucleusSelector() {
+  const select = $('#addNucleusSelect');
+  select.innerHTML = '';
+  const options = elements.flatMap(element => element.isotopes
+    .filter(isotope => isotope.spin && isotope.gamma)
+    .map(isotope => ({ key: `${isotope.mass}${element.symbol}`, label: nuclideLabel(isotope.mass, element.symbol), z: element.atomic_number, mass: Number(isotope.mass) || 0 })));
+  options.sort((a, b) => a.z - b.z || a.mass - b.mass);
+  for (const optionData of options) {
+    const option = document.createElement('option');
+    option.value = optionData.key;
+    option.textContent = optionData.label;
+    select.appendChild(option);
+  }
+}
+
+function renderComparison() {
+  const tbody = $('#comparisonBody');
+  tbody.innerHTML = '';
+  $('#selectedEmpty').hidden = state.pins.length > 0;
+  $('#comparisonTable').hidden = state.pins.length === 0;
+  const deltaPpm = Number($('#deltaPpmInput')?.value || 0);
+  const maxFrequency = Math.max(1, ...state.pins.map(pin => frequencyMhz(pin.gamma) || 0));
+  const bars = $('#frequencyBars');
+  bars.innerHTML = '';
+
+  state.pins.forEach((pin, index) => {
+    const frequency = frequencyMhz(pin.gamma);
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="comparison-nuclide">${nuclideLabel(pin.mass, pin.symbol)}</td>
+      <td>${escapeHtml(pin.spin || '—')}</td>
+      <td>${compactNumber(pin.abundance)}</td>
+      <td>${compactNumber(pin.gamma)}</td>
+      <td class="comparison-frequency">${comparisonFrequencyText(frequency)}</td>
+      <td>${compactNumber(pin.receptivity)}</td>
+      <td>${frequency == null ? '—' : (deltaPpm * frequency).toFixed(2)}</td>
+      <td><button class="remove-pin" aria-label="remove ${escapeHtml(pin.key)}">×</button></td>`;
+    row.querySelector('.remove-pin').addEventListener('click', () => {
+      state.pins.splice(index, 1);
+      renderFrequencies();
+      renderComparison();
+      if (state.inspectorSymbol) renderInspector();
+      updateUrl();
+    });
+    tbody.appendChild(row);
+
+    if (frequency != null) {
+      const bar = document.createElement('div');
+      bar.className = 'bar-row';
+      bar.innerHTML = `<b>${nuclideLabel(pin.mass, pin.symbol)}</b><div class="bar-track"><div class="bar-fill" style="width:${frequency / maxFrequency * 100}%"></div></div><span>${comparisonFrequencyText(frequency)}</span>`;
+      bars.appendChild(bar);
+    }
+  });
+}
+
+function setupStructure(img, fallback, primaryQuery, secondaryQuery = null) {
+  let fallbackTried = false;
+  fallback.textContent = '';
+  img.hidden = false;
+  const setQuery = query => {
+    img.src = `https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/${encodeURIComponent(query)}/PNG?record_type=2d&image_size=small`;
+  };
+  img.onload = () => { fallback.textContent = ''; };
+  img.onerror = () => {
+    if (!fallbackTried && secondaryQuery && secondaryQuery !== primaryQuery) {
+      fallbackTried = true;
+      setQuery(secondaryQuery);
+      return;
+    }
+    img.hidden = true;
+    fallback.textContent = 'structure unavailable';
+  };
+  setQuery(primaryQuery);
+}
+
+function renderSolventList() {
+  const root = $('#solventList');
+  root.innerHTML = '';
+  solventData.forEach((solvent, index) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `solvent-choice${index === state.solventIndex ? ' active' : ''}`;
+    button.innerHTML = `<span>${escapeHtml(solvent.name)}</span><small>${formulaHtml(solvent.formula)}</small>`;
+    button.addEventListener('click', () => {
+      state.solventIndex = index;
+      renderSolventList();
+      renderSolventViewer();
+    });
+    root.appendChild(button);
+  });
+}
+
+function makeStickPlot(entries, hod, nucleus) {
+  const root = $('#solventStickPlot');
+  root.innerHTML = '';
+  const max = nucleus === '1H' ? 12 : 220;
