@@ -1,0 +1,60 @@
+
+  history.replaceState(null, '', `${location.pathname}?${params.toString()}${location.hash}`);
+}
+
+function restoreUrl() {
+  const params = new URLSearchParams(location.search);
+  if (params.has('field')) {
+    const value = Number(params.get('field'));
+    if (Number.isFinite(value)) state.field = value;
+  }
+  const keys = (params.get('nuclei') || '1H,13C,19F,31P').split(',').filter(Boolean);
+  state.pins = [];
+  for (const key of keys) addPinByKeySilent(key);
+}
+
+function addPinByKeySilent(key) {
+  for (const element of elements) {
+    const isotope = element.isotopes.find(item => `${item.mass}${element.symbol}` === key);
+    if (isotope) {
+      state.pins.push(pinObject(element, isotope));
+      return;
+    }
+  }
+}
+
+await loadData();
+restoreUrl();
+initPresets();
+renderPeriodic();
+initFilters();
+renderNucleusSelector();
+initSolvents();
+initImpurities();
+
+$('#fieldInput').addEventListener('change', event => setField(event.target.value));
+$('#protonInput').addEventListener('change', event => setProton(event.target.value));
+$('#fieldSlider').addEventListener('input', event => setProton(sliderToMhz(event.target.value)));
+$('#deltaPpmInput').addEventListener('input', renderComparison);
+$('#addNucleusButton').addEventListener('click', () => addPinByKey($('#addNucleusSelect').value));
+$('#clearPins').addEventListener('click', () => {
+  state.pins = [];
+  renderFrequencies();
+  renderComparison();
+  if (state.inspectorSymbol) renderInspector();
+  updateUrl();
+});
+$('#inspectorClose').addEventListener('click', closeInspector);
+document.addEventListener('keydown', event => { if (event.key === 'Escape') closeInspector(); });
+document.addEventListener('pointerdown', event => {
+  const panel = $('#isotopeInspector');
+  if (panel.hidden || panel.contains(event.target) || event.target.closest('.element-block')) return;
+  closeInspector();
+});
+window.addEventListener('resize', () => {
+  updateLayoutName();
+  if (state.inspectorSymbol && window.innerWidth > 720) closeInspector();
+});
+$('#currentYear').textContent = new Date().getFullYear();
+setField(state.field);
+renderComparison();
