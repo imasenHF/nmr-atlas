@@ -1,5 +1,5 @@
 const gammaH=42.57747892;
-const MHZ_MIN=0.1;
+const MHZ_MIN=0.001;
 const MHZ_MAX=2000;
 const mediaOrder=['CDCl3','acetone-d6','DMSO-d6','CD3CN','CD3OD','D2O'];
 const aliases={
@@ -15,7 +15,7 @@ const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 const state={field:9.39464,pins:[],filter:'all',query:'',solventIndex:0,solventNucleus:'1H',impurityNucleus:'1H'};
 let elements=[],solventData=[],impurityData=[];
-const presets=[5,20,43,60,80,100,300,400,500,600,800,1000,1200];
+const presets=[1,5,20,43,60,80,100,300,400,500,600,800,1000,1200];
 const fmt=(v,n=2)=>Number(v).toFixed(n);
 const sup=n=>String(n).replace(/\d/g,d=>'⁰¹²³⁴⁵⁶⁷⁸⁹'[+d]);
 const nuclideLabel=(mass,symbol)=>mass?`${sup(mass)}${symbol}`:symbol;
@@ -84,7 +84,7 @@ function elementGridPosition(e){
 }
 function isotopeButton(e,i){
   const d=document.createElement('button');
-  const spinClass=i.spin==='1/2'?'half':'other';
+  const spinClass=i.spin==='1/2'?'half':i.spin?'other':'unknown';
   d.className=`isotope-cell ${spinClass}`;d.dataset.spinClass=spinClass;d.dataset.symbol=e.symbol;d.dataset.mass=i.mass;d.dataset.gamma=i.gamma;
   d.dataset.search=`${i.mass}${e.symbol} ${e.name} ${e.symbol}`.toLowerCase();
   d.innerHTML=`<span class="mass"><sup>${i.mass||''}</sup>${e.symbol}</span><span class="meta">I = ${i.spin||'—'}</span><span class="meta">${i.abundance||'—'}%</span><span class="meta gamma">γ ${i.gamma||'—'}</span><span class="freq">${i.gamma?frequencyText(frequencyMhz(i.gamma)):'—'}</span>`;
