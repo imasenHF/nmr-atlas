@@ -1,4 +1,4 @@
-import{$,$$,state,solventData,impurityData,mediaOrder,solventMeta,impurityFormula,parseShift,pubchemImage}from'./core.js?v=20261008-runtimefix';
+import{$,$$,state,solventData,impurityData,mediaOrder,solventMeta,impurityFormula,parseShift,pubchemImage}from'./core.js?v=20261008-palette2';
 
 const fullRanges={'1H':[12,0],'13C':[220,0]};
 const plotRanges={'1H':[...fullRanges['1H']],'13C':[...fullRanges['13C']]};
