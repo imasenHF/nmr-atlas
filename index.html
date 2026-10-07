@@ -13,13 +13,13 @@
 <a class="skip-link" href="#main-content">跳至正文</a>
 <header class="site-header">
   <div class="container header-inner">
-    <a class="section-brand" href="https://plastocyanin.org/" aria-label="plastocyanin">
-      <img class="section-brand-icon" src="https://plastocyanin.org/assets/images/imasen_phi_logo/imasen-phi-64.png" alt="">
-      <span class="section-brand-text">
+    <div class="section-brand">
+      <a class="brand-home" href="https://plastocyanin.org/" aria-label="plastocyanin home">
+        <img class="section-brand-icon" src="https://plastocyanin.org/assets/images/imasen_phi_logo/imasen-phi-64.png" alt="">
         <span class="section-brand-title">plast<span>o</span>cyanin<span>.</span></span>
-        <span class="section-brand-subtitle">NMR <span>Atlas</span></span>
-      </span>
-    </a>
+      </a>
+      <a class="brand-atlas" href="./">NMR <span>Atlas</span></a>
+    </div>
     <nav class="site-nav" aria-label="主导航">
       <a href="https://plastocyanin.org/">Home</a>
       <a href="https://plastocyanin.org/projects/" aria-current="page">Workshop</a>
@@ -72,8 +72,24 @@
   </section>
   <section class="periodic-section" aria-label="NMR periodic table">
     <div class="atlas-wide periodic-meta">
-      <div class="data-key"><span>I</span><span>abundance / %</span><span>γ/2π / MHz T<sup>−1</sup></span><span>ν / <b id="tableFrequencyUnit">MHz</b></span><span>R / <sup>13</sup>C = 1</span></div>
-      <div class="layout-note"><span class="layout-name" id="layoutName">Full layout</span><span>点击元素或核素查看局部信息</span></div>
+      <div class="data-key">
+        <span class="key-title">CELL DATA</span>
+        <span>isotope</span>
+        <span>abundance / %</span>
+        <span>ν / <b id="tableFrequencyUnit">MHz</b></span>
+        <span>R / <sup>13</sup>C = 1</span>
+        <span class="key-hover">hover: I · γ/2π / MHz T<sup>−1</sup></span>
+      </div>
+      <div class="periodic-meta-right">
+        <div class="palette-switch" id="paletteSwitch" aria-label="周期表配色">
+          <span>COLOR</span>
+          <button class="active" data-palette="wave">Wave</button>
+          <button data-palette="atlas">Atlas</button>
+          <button data-palette="mineral">Mineral</button>
+          <button data-palette="mono">Mono</button>
+        </div>
+        <span class="layout-name" id="layoutName">Full · 18 groups</span>
+      </div>
     </div>
     <div class="periodic-frame atlas-wide"><div class="periodic-scroll" id="periodicScroll"><div id="periodicTable"></div></div></div>
     <div class="atlas-wide table-caption"><span>筛选作用于核素；元素只要存在符合条件的核素即保持正常显示。</span><span>频率显示为 |ν|，γ 保留正负号。</span></div>
@@ -86,13 +102,10 @@
     <div class="section-heading comparison-heading">
       <div><p class="eyebrow">NUCLEI COMPARISON</p><h2>核种比较</h2></div>
       <div class="comparison-controls">
-        <label>Δδ / ppm <input id="deltaPpmInput" type="number" step="0.001" value="0.100"></label>
-        <label>Add nucleus <select id="addNucleusSelect"></select></label>
-        <button id="addNucleusButton" class="plain-button">Add</button>
-        <button id="clearPins" class="text-button">Clear</button>
+        <label>Δδ / ppm <input id="deltaPpmInput" type="number" step="0.01" value="1"></label>
       </div>
     </div>
-    <div id="selectedEmpty" class="empty-state">点击周期表元素打开核素详情，或使用 Add nucleus 直接加入比较。</div>
+    <div id="selectedEmpty" class="empty-state">点击周期表中的核素即可加入比较。</div>
     <div class="comparison-scroll">
       <table id="comparisonTable" class="comparison-table">
         <thead><tr><th>Nucleus</th><th>Spin</th><th>Abundance / %</th><th>γ/2π / MHz T<sup>−1</sup></th><th>Frequency</th><th>Relative sensitivity<br><small>¹³C = 1</small></th><th>Δν / Hz</th><th></th></tr></thead>
@@ -119,8 +132,8 @@
           <div class="segmented spectrum-toggle" id="solventNucleusToggle"><button class="active" data-nucleus="1H">¹H</button><button data-nucleus="13C">¹³C</button></div>
         </header>
         <div class="stick-plot-wrap">
-          <div class="stick-plot-label"><span id="solventPlotNucleus">¹H</span><span>δ / ppm</span></div>
-          <div id="solventStickPlot" class="stick-plot"></div>
+          <div class="stick-plot-label"><span id="solventPlotNucleus">¹H</span><span>δ / ppm</span><span class="zoom-hint">滚轮缩放 · 双击复位</span></div>
+          <div id="solventStickPlot" class="stick-plot" tabindex="0" aria-label="溶剂化学位移棒状图，可用滚轮缩放"></div>
         </div>
         <div id="solventSignalList" class="signal-list"></div>
       </article>
@@ -130,12 +143,12 @@
   <section class="atlas-wide impurity-section" id="impurities">
     <div class="section-heading impurity-heading">
       <div><p class="eyebrow">IMPURITY SIGNALS</p><h2>常见杂质跨溶剂比较</h2></div>
-      <p class="section-note">同一种杂质占一行；六种氘代介质直接显示完整峰位、归属和多重性。</p>
     </div>
     <div class="impurity-toolbar">
       <input id="impuritySearch" type="search" placeholder="搜索 acetone, THF, pyridine…">
       <div class="segmented" id="impurityNucleusToggle"><button class="active" data-nucleus="1H">¹H</button><button data-nucleus="13C">¹³C</button></div>
     </div>
+    <div class="matrix-key"><span>每条记录</span><b>δ / ppm</b><b>assignment</b><b>multiplicity, J / Hz</b></div>
     <div class="impurity-scroll">
       <div class="impurity-matrix">
         <div class="impurity-grid-head"><span>Compound</span><span>CDCl₃</span><span>acetone-d₆</span><span>DMSO-d₆</span><span>CD₃CN</span><span>CD₃OD</span><span>D₂O</span></div>
@@ -154,7 +167,7 @@
   </section>
 </main>
 <footer class="site-footer container">
-  <div class="site-footer-brand"><a href="https://plastocyanin.org/">plast<span>o</span>cyanin<span>.</span></a><b>NMR Atlas</b><small>Interactive NMR reference</small></div>
+  <div class="site-footer-brand"><a class="footer-home" href="https://plastocyanin.org/">plast<span>o</span>cyanin<span>.</span></a><a class="footer-atlas" href="./">NMR Atlas</a><small>Interactive NMR reference</small></div>
   <div class="footer-right">© <span id="currentYear">2026</span> wuhaifeng@ustc.edu.cn. All rights reserved.<br>本站项目说明与文字内容版权归作者所有，未经许可不得复制、转载或用于商业用途。</div>
 </footer>
 <script type="module" src="assets/app.js"></script>
