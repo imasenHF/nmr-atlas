@@ -298,7 +298,60 @@ Compound 单元显示：
 - 代码拆分为 core / periodic / references 模块；
 - GitHub Pages workflow 已启用并可触发部署。
 
-## 10. 待检查项
+
+## 11. 2026-10-08 第二轮界面修订
+
+以下要求覆盖前文与之冲突的旧表述：
+
+### 周期表单元
+
+- 元素/核素方格继续保留 abundance、当前 frequency、relative sensitivity。
+- 方格内部移除 `I` 与 `γ/2π` 数值；这两项保留在 hover inspector / comparison 中。
+- 周期表外设置明确图例，说明方格各行数值含义与统一单位。
+- 元素符号与 isotope 字号略微降低，避免多核素元素溢出。
+- f block 与主表的垂直间距约为一个元素方格边长的 1/2。
+- 提供多个周期表配色方案并可即时切换；必须包含 Wave 方案。配色切换只作用于周期表数据区，不改变主站整体品牌色。
+
+### 周期表交互
+
+- 元素/核素详细信息改为 hover 触发，不再依赖点击打开。
+- hover 使用短延迟，目标约 300–400 ms，避免指针经过时频繁弹出。
+- 离开元素和 inspector 后短延迟关闭。
+- 点击 isotope 直接加入/移出 Nuclei Comparison。
+- 点击元素主体时添加该元素最主要的可用 NMR isotope（按天然丰度优先）。
+- inspector 为只读详情，显示 I、abundance、γ/2π、frequency、relative sensitivity。
+
+### Nuclei Comparison
+
+- 删除 Add nucleus 下拉框与 Add 按钮；核种添加只通过周期表点击完成。
+- 控制区只保留 `Δδ / ppm` 输入，默认值为 1。
+- 各行仍保留删除按钮。
+
+### Solvent Signals
+
+- 结构图继续无框显示，并处理 PubChem PNG 白底的视觉问题；显示尺寸增大并裁掉明显白边。
+- chemical-shift 棒状图支持鼠标滚轮缩放横轴，围绕指针位置缩放。
+- 双击谱图恢复完整横轴范围。
+- 页面只保留必要的科学说明和操作提示，删除空泛说明文字。
+
+### Impurity Signals
+
+- 删除标题右侧“同一种杂质占一行……”等说明性句子。
+- 删除页面中其他没有数据含义、操作含义或来源含义的类似文字。
+- 每个 solvent cell 的 signal 改为更充分利用横向空间的布局：shift / assignment / multiplicity(J) 三列或等效结构，不把前两项挤在左侧后留下大面积空白。
+- solvent 列适当加宽，宁可整体横向滚动。
+- 表头 solvent 名称显著增大。
+- compound structure 放大并通过裁剪/混合方式减少 PNG 白边和白底视觉。
+- 增加矩阵图例，明确每条记录的字段：`δ / ppm | assignment | multiplicity, J / Hz`。
+
+### 品牌链接
+
+- 页头 plastocyanin. 与 NMR Atlas 必须是两个独立链接。
+- plastocyanin. 链接主站；NMR Atlas 链接当前 NMR Atlas 首页。
+- 页尾 NMR Atlas 也必须可点击。
+- 页尾品牌链接增加明确 hover 文字变色效果。
+
+## 12. 待检查项
 
 - 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
 - impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
