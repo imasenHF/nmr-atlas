@@ -35,11 +35,14 @@ const pubchemUrl=name=>`https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/
 
 async function loadData(){
   try{
-    const res=await fetch('data/nmr-data.json.gz.b64');
-    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const parts=await Promise.all([1,2,3,4].map(async n=>{
+      const res=await fetch(`data/nmr-data.part${n}`);
+      if(!res.ok)throw new Error(`data part ${n}: HTTP ${res.status}`);
+      return res.text();
+    }));
     let text;
     if('DecompressionStream' in window){
-      const b64=(await res.text()).trim();
+      const b64=parts.join('').trim();
       const bin=atob(b64);
       const bytes=new Uint8Array(bin.length);
       for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
