@@ -1,0 +1,196 @@
+
+      const normalizeEntries = (entries, couplings) => (entries || []).map((entry, index) => typeof entry === 'object' ? entry : { shift: String(entry), j_hz: (couplings || [])[index] || '' });
+      return {
+        ...solvent,
+        h1: normalizeEntries(solvent.h1, solvent.j_hz),
+        c13: normalizeEntries(solvent.c13, solvent.jc_hz),
+        ...(solventMeta[solvent.name] || { formula:'', residual:'proton-containing isotopologue(s)', structure_query:solvent.name, fallback_query:solvent.name })
+      };
+    });
+    impurityData = payload.impurities;
+  } catch (error) {
+    document.querySelector('main').innerHTML = `<section class="container loading"><h1>NMR Atlas</h1><p>数据加载失败：${escapeHtml(error.message || error)}</p><p>请通过 HTTP/HTTPS 打开页面。</p></section>`;
+    throw error;
+  }
+}
+
+function initPresets() {
+  const root = $('#presetButtons');
+  for (const mhz of presets) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = mhz >= 1000 ? `${(mhz / 1000).toFixed(1)}G` : String(mhz);
+    button.dataset.mhz = String(mhz);
+    button.addEventListener('click', () => setProton(mhz));
+    root.appendChild(button);
+  }
+}
+
+function setField(value) {
+  const minT = MHZ_MIN / gammaH;
+  const maxT = MHZ_MAX / gammaH;
+  const numeric = Number(value);
+  state.field = Math.max(minT, Math.min(maxT, Number.isFinite(numeric) ? numeric : state.field));
+  const proton = state.field * gammaH;
+  $('#fieldInput').value = state.field < 0.1 ? state.field.toFixed(6) : state.field.toFixed(5);
+  $('#protonInput').value = proton < 10 ? proton.toFixed(3) : proton.toFixed(2);
+  $('#fieldSlider').value = String(mhzToSlider(proton));
+  $('#nominalField').textContent = comparisonFrequencyText(proton);
+  $('#fieldExact').textContent = `${state.field < 0.1 ? state.field.toFixed(6) : state.field.toFixed(5)} T`;
+  $$('#presetButtons button').forEach(button => button.classList.toggle('active', Math.abs(Number(button.dataset.mhz) - proton) < 0.01));
+  renderFrequencies();
+  renderComparison();
+  if (state.inspectorSymbol) renderInspector();
+  updateUrl();
+}
+
+function setProton(mhz) {
+  const numeric = Number(mhz);
+  const value = Math.max(MHZ_MIN, Math.min(MHZ_MAX, Number.isFinite(numeric) ? numeric : state.field * gammaH));
+  setField(value / gammaH);
+}
+
+function fullPosition(element) {
+  if (element.series === 'main') return { col: element.group, row: element.period + 1 };
+  if (element.series === 'lanthanide') return { col: element.full_col, row: 9 };
+  return { col: element.full_col, row: 10 };
+}
+
+function compactPosition(element) {
+  if (element.series === 'main') {
+    if (element.block === 's') return { col: element.group, row: element.period };
+    if (element.block === 'p') return { col: 9 + (element.group - 13), row: element.period };
+    return { col: 3 + (element.group - 3), row: 8 + (element.period - 3) };
+  }
+  if (element.series === 'lanthanide') return { col: element.atomic_number - 57, row: 14 };
+  return { col: 6, row: 15 };
+}
+
+function narrowPosition(element) {
+  if (element.series === 'main') {
+    if (element.block === 's') return { col: element.group, row: element.period };
+    if (element.block === 'p') return { col: 5 + (element.group - 13), row: element.period };
+    return { col: element.group - 2, row: 8 + (element.period - 3) };
+  }
+  if (element.series === 'lanthanide') {
+    const index = element.atomic_number - 58;
+    return index < 7 ? { col: 2 + index, row: 14 } : { col: 2 + (index - 7), row: 15 };
+  }
+  return { col: 2, row: 16 };
+}
+
+function spinClass(isotope) {
+  if (!isotope.spin) return 'unknown';
+  return isotope.spin === '1/2' ? 'half' : 'other';
+}
+
+function isotopeSearchText(element, isotope) {
+  return `${isotope.mass}${element.symbol} ${element.symbol} ${element.name}`.toLowerCase();
+}
+
+function isotopeButton(element, isotope) {
+  const button = document.createElement('button');
+  const kind = spinClass(isotope);
+  button.type = 'button';
+  button.className = `isotope-cell ${kind}`;
+  button.dataset.spinClass = kind;
+  button.dataset.symbol = element.symbol;
+  button.dataset.mass = isotope.mass;
+  button.dataset.gamma = isotope.gamma;
+  button.dataset.search = isotopeSearchText(element, isotope);
+  button.dataset.key = `${isotope.mass}${element.symbol}`;
+  button.innerHTML = `
+    <span class="iso-mass"><sup>${escapeHtml(isotope.mass)}</sup>${escapeHtml(element.symbol)}</span>
+    <span class="iso-line">${escapeHtml(isotope.spin || '—')}</span>
+    <span class="iso-line abundance">${compactNumber(isotope.abundance)}</span>
+    <span class="iso-line gamma">${compactNumber(isotope.gamma)}</span>
+    <span class="iso-line freq">${isotope.gamma ? tableFrequencyValue(isotope.gamma) : '—'}</span>
+    <span class="iso-line receptivity">${compactNumber(isotope.receptivity)}</span>`;
+  if (kind === 'unknown') {
+    button.disabled = true;
+    button.setAttribute('aria-disabled', 'true');
+  } else {
+    button.title = `${isotope.mass}${element.symbol} · I=${isotope.spin || 'n/a'}`;
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      openInspector(element.symbol, button.dataset.key, button);
+    });
+  }
+  return button;
+}
+
+function renderPeriodic() {
+  const root = $('#periodicTable');
+  root.innerHTML = '';
+  for (let group = 1; group <= 18; group += 1) {
+    const label = document.createElement('div');
+    label.className = 'group-number';
+    label.style.setProperty('--full-col', group);
+    label.textContent = group;
+    root.appendChild(label);
+  }
+  for (const element of elements) {
+    const full = fullPosition(element);
+    const compact = compactPosition(element);
+    const narrow = narrowPosition(element);
+    const block = document.createElement('article');
+    block.className = `element-block block-${element.block}`;
+    block.dataset.element = element.symbol;
+    block.dataset.search = `${element.symbol} ${element.name} ${element.atomic_number}`.toLowerCase();
+    block.style.setProperty('--full-col', full.col);
+    block.style.setProperty('--full-row', full.row);
+    block.style.setProperty('--compact-col', compact.col);
+    block.style.setProperty('--compact-row', compact.row);
+    block.style.setProperty('--narrow-col', narrow.col);
+    block.style.setProperty('--narrow-row', narrow.row);
+
+    const identity = document.createElement('button');
+    identity.type = 'button';
+    identity.className = 'element-main';
+    identity.innerHTML = `
+      <span class="atomic-number">${element.atomic_number}</span>
+      <span class="symbol">${escapeHtml(element.symbol)}</span>
+      <span class="element-name">${escapeHtml(element.name)}</span>
+      <span class="shift-range">${element.shift_range ? escapeHtml(element.shift_range) : '&nbsp;'}</span>`;
+    identity.addEventListener('click', () => openInspector(element.symbol, null, identity));
+
+    const strip = document.createElement('div');
+    strip.className = 'isotope-strip';
+    for (const isotope of element.isotopes) strip.appendChild(isotopeButton(element, isotope));
+    block.append(identity, strip);
+    root.appendChild(block);
+  }
+  applyFilter();
+  renderFrequencies();
+  updateLayoutName();
+}
+
+function renderFrequencies() {
+  const scale = tableFrequencyScale();
+  $('#tableFrequencyUnit').textContent = scale.unit;
+  $$('.isotope-cell').forEach(cell => {
+    const frequency = cell.querySelector('.freq');
+    frequency.textContent = cell.dataset.gamma ? tableFrequencyValue(cell.dataset.gamma) : '—';
+    cell.classList.toggle('pinned', state.pins.some(pin => pin.key === cell.dataset.key));
+  });
+}
+
+function applyFilter() {
+  const query = state.query.trim().toLowerCase();
+  $$('.element-block').forEach(block => {
+    const elementText = block.dataset.search;
+    let visibleKnown = 0;
+    let visibleAny = 0;
+    let queryHit = !query || elementText.includes(query);
+    block.querySelectorAll('.isotope-cell').forEach(cell => {
+      const filterPass = state.filter === 'all' || cell.dataset.spinClass === state.filter;
+      let queryPass = true;
+      if (query) queryPass = /\d/.test(query) ? cell.dataset.search.includes(query) : elementText.includes(query) || cell.dataset.search.includes(query);
+      const show = filterPass && queryPass;
+      cell.classList.toggle('filtered-out', !show);
+      if (show) {
+        visibleAny += 1;
+        if (cell.dataset.spinClass !== 'unknown') visibleKnown += 1;
+        queryHit = true;
+      }
+    });
