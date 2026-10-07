@@ -372,7 +372,33 @@ Compound 单元显示：
 - 页尾 NMR Atlas 已增加独立链接，品牌链接增加 hover 变色；
 - Pages workflow 增加 JavaScript syntax check，在部署前检查 core / periodic / references / app 四个模块。
 
-## 13. 待检查项
+
+## 14. 2026-10-08 运行故障与品牌修订
+
+### 运行故障
+
+第二轮修改后线上页面动态数据未加载。已定位为 `assets/references.js` 的运行前语法错误：
+
+- 错误对象键写法：`{1H:[12,0],13C:[220,0]}`
+- 修正为：`{'1H':[12,0],'13C':[220,0]}`
+
+该错误会使 ES module 在解析阶段终止，导致 `app.js` 无法继续执行，因此周期表、核种比较、溶剂和杂质动态数据同时消失。
+
+修正后同时给入口脚本与内部 module import 增加同一版本查询参数，避免浏览器继续使用修复前的缓存模块。
+
+### 品牌颜色与交互
+
+NMR Atlas 的页头、页尾品牌严格跟随主站当前模板和 `assets/css/section-brand.css`：
+
+- 默认主体文字：`#203139`；
+- hover / active / keyboard focus：主体文字改为 `#355c7d`，并显示细下划线；
+- `plastocyanin.` 中品牌金色保持 `#b68c37`；
+- 按主站当前模板，`plastocyanin.` 的字母 `o` 与末尾圆点保持金色，hover 时仍保持金色；
+- `NMR Atlas` 不使用金色字母，默认全部为深蓝灰，交互时整体变为主题蓝；
+- 页头图标、`plastocyanin.`、`NMR Atlas` 的链接语义与主站栏目品牌一致；
+- 页尾 `plastocyanin.` 与 `NMR Atlas` 采用与主站 footer brand 相同的默认色、hover 色与下划线反馈。
+
+## 15. 待检查项
 
 - 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
 - impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
