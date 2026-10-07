@@ -1,9 +1,10 @@
 import{$,state,loadData}from'./core.js';
-import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,restoreUrl,setField,renderComparison}from'./periodic.js';
+import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,initPalette,restoreUrl,setField,renderComparison}from'./periodic.js';
 import{initSolvents,initImpurities}from'./references.js';
 try{
   await loadData();
   restoreUrl();
+  initPalette();
   initPresets();
   renderPeriodic();
   initFilters();
