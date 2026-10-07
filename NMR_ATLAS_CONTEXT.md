@@ -278,7 +278,27 @@ Compound 单元显示：
 13. 品牌副标题使用 NMR Atlas；
 14. 检查 GitHub Pages 构建和线上预览状态。
 
-## 9. 待检查项
+## 9. 本轮实现状态
+
+已实施：
+
+- 页面品牌副标题已改为 NMR Atlas；
+- 周期表保留原有核素参数，元素区/核素区按约 38.2% : 61.8% 布局；
+- 宽屏采用完整 18 group，较窄屏将 s/p、d、f 区块拆分显示；
+- 周期表数值精度统一，frequency 单位移到表外；
+- Spin filter 按核素筛选；
+- 增加元素/核素 inspector；
+- Nuclei Comparison 已加入 abundance、γ/2π、frequency、relative sensitivity 和公共 Δδ→Δν；
+- 独立 ppm/Hz 区域已移除；
+- Solvent selector 改为两列，增加 formula 和 residual protonated isotopologue/species 说明；
+- Solvent structure 改为无框显示；
+- Impurity Signals 改为单层矩阵，六种介质直接显示完整 shift、assignment 和 multiplicity；
+- Impurity 展开详情、+N signals、click for assignments 和 structure placeholder 已移除；
+- Impurity 主表增加 sticky header / first column 和较大的正文尺寸；
+- 代码拆分为 core / periodic / references 模块；
+- GitHub Pages workflow 已启用并可触发部署。
+
+## 10. 待检查项
 
 - 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
 - impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
