@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f6f6f3">
+  <meta name="description" content="NMR Atlas：交互式核素周期表、场强与频率换算、氘代溶剂残余峰和常见杂质化学位移参考。">
+  <title>NMR Atlas · plastocyanin</title>
+  <link rel="icon" href="https://plastocyanin.org/assets/images/imasen_phi_logo/favicon.ico">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">跳至正文</a>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="section-brand" href="https://plastocyanin.org/" aria-label="plastocyanin">
+      <img class="section-brand-icon" src="https://plastocyanin.org/assets/images/imasen_phi_logo/imasen-phi-64.png" alt="">
+      <span class="section-brand-text">
+        <span class="section-brand-title">plast<span>o</span>cyanin<span>.</span></span>
+        <span class="section-brand-subtitle">W<span>o</span>rksh<span>o</span>p</span>
+      </span>
+    </a>
+    <nav class="site-nav" aria-label="主导航">
+      <a href="https://plastocyanin.org/">Home</a>
+      <a href="https://plastocyanin.org/projects/" aria-current="page">Workshop</a>
+      <a href="https://plastocyanin.org/notes/">Notebook</a>
+      <a href="https://plastocyanin.org/about/">About / CV</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main-content">
+  <section class="container intro">
+    <p class="eyebrow"><a href="https://plastocyanin.org/projects/">WORKSHOP</a> / NMR ATLAS</p>
+    <div class="intro-grid">
+      <div>
+        <h1>NMR Periodic Table</h1>
+        <p class="lede">交互式核素频率、自旋参数与化学位移参考。磁场和 <sup>1</sup>H 频率双向联动，覆盖低场至高场 NMR。</p>
+      </div>
+      <div class="formula"><span>ν<sub>i</sub> = |γ<sub>i</sub>/2π| B<sub>0</sub></span><small>frequency magnitude</small></div>
+    </div>
+  </section>
+
+  <section class="container control-band" aria-label="磁场控制">
+    <div class="field-control">
+      <label for="fieldInput">B<sub>0</sub> / T</label>
+      <div class="input-line"><input id="fieldInput" type="number" min="0.002" max="50" step="0.00001" value="9.39464"><span>T</span></div>
+    </div>
+    <div class="field-control">
+      <label for="protonInput"><sup>1</sup>H frequency</label>
+      <div class="input-line"><input id="protonInput" type="number" min="0.1" max="2000" step="0.01" value="400.00"><span>MHz</span></div>
+    </div>
+    <div class="field-control nominal">
+      <span class="control-label">CURRENT FIELD</span>
+      <strong id="nominalField">400.00 MHz</strong>
+      <small id="fieldExact">9.39464 T</small>
+    </div>
+    <div class="presets" aria-label="常用频率">
+      <span class="control-label">PRESETS · ¹H MHz</span>
+      <div id="presetButtons"></div>
+    </div>
+    <div class="field-slider">
+      <div class="slider-scale"><span>0.1 MHz</span><span>log frequency scale</span><span>2.0 GHz</span></div>
+      <input id="fieldSlider" aria-label="质子频率对数滑块" type="range" min="0" max="1000" step="1" value="837">
+    </div>
+  </section>
+
+  <section class="periodic-tools container-wide">
+    <div class="search-wrap">
+      <label for="nucleusSearch">Find isotope or element</label>
+      <input id="nucleusSearch" type="search" placeholder="13C, Carbon, 31P, Fluorine…">
+    </div>
+    <div class="filter-wrap">
+      <span>NUCLEAR SPIN</span>
+      <div class="segmented" id="spinFilters">
+        <button class="active" data-filter="all">All</button>
+        <button data-filter="half">I = 1/2</button>
+        <button data-filter="other">I &gt; 1/2</button>
+      </div>
+    </div>
+    <div class="legend"><span><i class="half"></i>I = 1/2</span><span><i class="other"></i>I &gt; 1/2</span></div>
+  </section>
+
+  <section class="periodic-section" aria-label="NMR periodic table">
+    <div class="periodic-frame">
+      <div class="periodic-scroll"><div id="periodicTable" class="periodic-table"></div></div>
+    </div>
+    <div class="container-wide table-caption"><span>筛选作用于核素；元素只要存在符合条件的核素即保持高亮。</span><span>频率显示为 |ν|，γ 保留正负号。</span></div>
+  </section>
+
+  <section class="container selected-section">
+    <div class="section-heading"><div><p class="eyebrow">SELECTED NUCLEI</p><h2>核种比较</h2></div><button id="clearPins" class="text-button">Clear selection</button></div>
+    <div id="selectedEmpty" class="empty-state">点击周期表中的核素加入比较。</div>
+    <div id="selectedNuclei" class="selected-list"></div>
+    <div id="frequencyBars" class="frequency-bars"></div>
+  </section>
+
+  <section class="container converter-section">
+    <div class="section-heading"><div><p class="eyebrow">CHEMICAL SHIFT CONVERTER</p><h2>ppm ↔ Hz</h2></div><p class="section-note">按当前磁场和核种工作频率换算。</p></div>
+    <div class="converter-grid">
+      <label>核种<select id="converterNucleus"></select></label>
+      <label>Δδ / ppm<input id="ppmInput" type="number" step="0.001" value="0.100"></label>
+      <div class="converter-result"><span>Δν</span><strong id="hzOutput">40.00 Hz</strong><small id="converterFrequency">400.00 MHz</small></div>
+    </div>
+  </section>
+
+  <section class="container reference-section" id="signals">
+    <div class="section-heading"><div><p class="eyebrow">SOLVENT SIGNALS</p><h2>氘代溶剂残余信号</h2></div><p class="section-note">溶剂数量较少，采用结构、化学位移轴和棒状谱联合浏览。</p></div>
+    <div class="solvent-browser">
+      <div class="solvent-list" id="solventList"></div>
+      <article class="solvent-viewer">
+        <header class="compound-head">
+          <div class="structure-box"><img id="solventStructure" alt=""><span id="solventStructureFallback">structure</span></div>
+          <div><p class="eyebrow">SELECTED SOLVENT</p><h3 id="solventName">—</h3><p id="solventNote" class="compound-note"></p></div>
+          <div class="segmented spectrum-toggle" id="solventNucleusToggle"><button class="active" data-nucleus="1H">¹H</button><button data-nucleus="13C">¹³C</button></div>
+        </header>
+        <div class="stick-plot-wrap">
+          <div class="stick-plot-label"><span id="solventPlotNucleus">¹H</span><span>δ / ppm</span></div>
+          <div id="solventStickPlot" class="stick-plot"></div>
+        </div>
+        <div id="solventSignalList" class="signal-list"></div>
+      </article>
+    </div>
+    <p class="reference-note">残余溶剂数据来自 Cambridge Isotope Laboratories NMR Solvent Data Chart。来源注明化学位移可随溶剂、浓度与温度变化。</p>
+  </section>
+
+  <section class="container-wide impurity-section" id="impurities">
+    <div class="section-heading impurity-heading"><div><p class="eyebrow">IMPURITY SIGNALS</p><h2>常见杂质跨溶剂比较</h2></div><p class="section-note">同一种杂质集中为一组，横向比较六种氘代介质。</p></div>
+    <div class="impurity-toolbar">
+      <input id="impuritySearch" type="search" placeholder="搜索 acetone, THF, pyridine…">
+      <div class="segmented" id="impurityNucleusToggle"><button class="active" data-nucleus="1H">¹H</button><button data-nucleus="13C">¹³C</button></div>
+    </div>
+    <div class="impurity-grid-head"><span>Compound</span><span>CDCl₃</span><span>acetone-d₆</span><span>DMSO-d₆</span><span>CD₃CN</span><span>CD₃OD</span><span>D₂O</span></div>
+    <div id="impurityGroups" class="impurity-groups"></div>
+    <p class="reference-note">Babij et al., <em>Org. Process Res. Dev.</em> 2016, 20, 661–667 及 Supporting Information；DOI 10.1021/acs.oprd.5b00417。结构图当前通过 PubChem 按规范化化合物名称查询；数据层已预留 CAS/SMILES 标识字段。</p>
+  </section>
+
+  <section class="container source-section">
+    <p class="eyebrow">DATA NOTES</p>
+    <div class="source-grid">
+      <p><strong>Isotopes.</strong> 核种、自旋、天然丰度、γ/2π 与相对 receptivity 来自原始 <code>table400.tex</code> 数据。</p>
+      <p><strong>Solvents.</strong> 氘代溶剂残余峰采用 Cambridge Isotope Laboratories 的 NMR Solvent Data Chart。</p>
+      <p><strong>Impurities.</strong> 杂质峰采用 Babij 等论文及 Supporting Information 中六种常用氘代介质的 ¹H / ¹³C 数据。</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer container">
+  <div class="site-footer-brand"><a href="https://plastocyanin.org/">plast<span>o</span>cyanin<span>.</span></a><b>NMR Atlas</b><small>Workshop / Reference Tool</small></div>
+  <div class="footer-right">© <span id="currentYear">2026</span> wuhaifeng@ustc.edu.cn. All rights reserved.<br>本站项目说明与文字内容版权归作者所有，未经许可不得复制、转载或用于商业用途。</div>
+</footer>
+
+<script type="module" src="assets/app.js"></script>
+</body>
+</html>
