@@ -55,7 +55,7 @@ NMR Atlas 是 plastocyanin Workshop 下的独立 NMR 交互参考工具。
 
 - 每个元素单元保持接近正方形；
 - 元素主区和核素区采用黄金分割关系，约 38.2% : 61.8%；
-- 多核素在右侧 61.8% 区域内纵向均分；
+- 多核素在右侧 61.8% 区域内横向分列，保持原 table400.tex 的 HalfMiddle / HalfRight 几何关系；
 - 不通过持续压小字号解决屏幕变窄；
 - 元素符号区不使用大面积深色块，改为与 plastocyanin 主题一致的低饱和蓝灰/青灰；
 - I = 1/2 使用低饱和金色系；
@@ -398,7 +398,59 @@ NMR Atlas 的页头、页尾品牌严格跟随主站当前模板和 `assets/css/
 - 页头图标、`plastocyanin.`、`NMR Atlas` 的链接语义与主站栏目品牌一致；
 - 页尾 `plastocyanin.` 与 `NMR Atlas` 采用与主站 footer brand 相同的默认色、hover 色与下划线反馈。
 
-## 15. 待检查项
+
+## 16. 2026-10-08 周期表配色、f 区间距与杂质行布局
+
+本节覆盖前述配色与间距实现状态中的不准确描述。
+
+### Wave 配色
+
+Wave 不再使用网页自行拟定的近似色，直接采用 `table400.tex` 中定义的颜色：
+
+- element / `back0`: `#2E58A4`
+- element text / `front0`: `#FFFFFF`
+- I = 1/2 / `back2`: `#FFC000`
+- I = 1/2 text / `front2`: `#002060`
+- I > 1/2 / `back1`: `#E3DED4`
+- I > 1/2 text / `front1`: `#002060`
+- outline / `outline1`: `#002060`
+- accent / `ciqtekBlue`: `#0068B7`
+- periodic-table background approximates `backfill!5` using `#F8FBFC`.
+
+### 其他配色
+
+其他周期表方案直接参考 SpinPlot 当前调色板定义：
+
+- JACS：以 `jacs` palette 的 `#1F5A85 / #C49A42 / #6E7378` 为主要映射；
+- Muted：以 `prism_muted` palette 的 `#4F7291 / #AA8258 / #747A7F` 为主要映射；
+- Pastel：以 `prism_pastel` palette 的 `#7FA9CC / #E3BE88 / #A9AFB5` 为主要映射。
+
+旧的 Atlas / Mineral / Mono 周期表方案取消。
+
+### f 区间距
+
+此前 Full layout 虽设置了 0.5 cell gap，但行号仍保留一个未使用的完整 cell row，实际形成约 1.5 cell 的空白。本次修正：
+
+- 主表占 grid row 2–7；
+- row 8 为 `0.5 × cell` 的间隔；
+- lanthanides 放 row 9；
+- actinides 放 row 10。
+
+因此主表末行到第一条 f block 的实际垂直间距约为半个元素方格边长。
+
+### Impurity Signals 两行布局
+
+为避免 assignment、multiplicity 和 J 在较窄 solvent cell 中溢出，每条 resonance 固定使用两行：
+
+第一行：
+`δ / ppm | assignment`
+
+第二行：
+`multiplicity, J / Hz`
+
+第二行占用该 resonance cell 的完整可用宽度，不再与 assignment 强制三列同行。
+
+## 17. 待检查项
 
 - 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
 - impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
