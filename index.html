@@ -11,7 +11,6 @@
 </head>
 <body>
 <a class="skip-link" href="#main-content">跳至正文</a>
-
 <header class="site-header">
   <div class="container header-inner">
     <a class="section-brand" href="https://plastocyanin.org/" aria-label="plastocyanin">
@@ -29,22 +28,17 @@
     </nav>
   </div>
 </header>
-
 <main id="main-content">
   <section class="container intro">
     <p class="eyebrow"><a href="https://plastocyanin.org/projects/">WORKSHOP</a> / NMR ATLAS</p>
     <div class="intro-grid">
       <div>
         <h1>NMR Periodic Table</h1>
-        <p class="lede">交互式核素频率、自旋参数与化学位移参考。磁场和 <sup>1</sup>H 频率双向联动，覆盖低场至高场 NMR。</p>
+        <p class="lede">交互式核素频率、自旋参数与化学位移参考。磁场与 <sup>1</sup>H 频率双向联动，覆盖低场至高场 NMR。</p>
       </div>
-      <div class="formula">
-        <span>ν<sub>i</sub> = |γ<sub>i</sub>/2π| B<sub>0</sub></span>
-        <small>frequency magnitude</small>
-      </div>
+      <div class="formula"><span>ν<sub>i</sub> = |γ<sub>i</sub>/2π| B<sub>0</sub></span><small>frequency magnitude</small></div>
     </div>
   </section>
-
   <section class="container control-band" aria-label="磁场控制">
     <div class="field-control">
       <label for="fieldInput">B<sub>0</sub> / T</label>
@@ -68,105 +62,61 @@
       <input id="fieldSlider" aria-label="质子频率对数滑块" type="range" min="0" max="1000" step="1" value="837">
     </div>
   </section>
-
   <section class="periodic-tools atlas-wide">
-    <div class="search-wrap">
-      <label for="nucleusSearch">Find isotope or element</label>
-      <input id="nucleusSearch" type="search" placeholder="13C, Carbon, 31P, Fluorine…">
-    </div>
+    <div class="search-wrap"><label for="nucleusSearch">Find isotope or element</label><input id="nucleusSearch" type="search" placeholder="13C, Carbon, 31P, Fluorine…"></div>
     <div class="filter-wrap">
       <span>NUCLEAR SPIN</span>
-      <div class="segmented" id="spinFilters">
-        <button class="active" data-filter="all">All</button>
-        <button data-filter="half">I = 1/2</button>
-        <button data-filter="other">I &gt; 1/2</button>
-      </div>
+      <div class="segmented" id="spinFilters"><button class="active" data-filter="all">All</button><button data-filter="half">I = 1/2</button><button data-filter="other">I &gt; 1/2</button></div>
     </div>
-    <div class="legend">
-      <span><i class="half"></i>I = 1/2</span>
-      <span><i class="other"></i>I &gt; 1/2</span>
-    </div>
+    <div class="legend"><span><i class="half"></i>I = 1/2</span><span><i class="other"></i>I &gt; 1/2</span></div>
   </section>
-
   <section class="periodic-section" aria-label="NMR periodic table">
     <div class="atlas-wide periodic-meta">
-      <div class="data-key">
-        <span>I</span>
-        <span>abundance / %</span>
-        <span>γ/2π / MHz T<sup>−1</sup></span>
-        <span>ν / <b id="tableFrequencyUnit">MHz</b></span>
-        <span>R / <sup>13</sup>C = 1</span>
-      </div>
-      <div class="layout-note"><span class="layout-name" id="layoutName">Full layout</span><span>点击元素或核素查看放大信息</span></div>
+      <div class="data-key"><span>I</span><span>abundance / %</span><span>γ/2π / MHz T<sup>−1</sup></span><span>ν / <b id="tableFrequencyUnit">MHz</b></span><span>R / <sup>13</sup>C = 1</span></div>
+      <div class="layout-note"><span class="layout-name" id="layoutName">Full layout</span><span>点击元素或核素查看局部信息</span></div>
     </div>
-    <div class="periodic-frame atlas-wide">
-      <div class="periodic-scroll" id="periodicScroll">
-        <div id="periodicTable" class="periodic-table"></div>
-      </div>
-    </div>
-    <div class="atlas-wide table-caption">
-      <span>筛选作用于核素；元素只要存在符合条件的核素即保持正常显示。</span>
-      <span>频率显示为 |ν|，γ 保留正负号。</span>
-    </div>
+    <div class="periodic-frame atlas-wide"><div class="periodic-scroll" id="periodicScroll"><div id="periodicTable"></div></div></div>
+    <div class="atlas-wide table-caption"><span>筛选作用于核素；元素只要存在符合条件的核素即保持正常显示。</span><span>频率显示为 |ν|，γ 保留正负号。</span></div>
   </section>
-
   <aside id="isotopeInspector" class="isotope-inspector" hidden aria-live="polite">
     <button id="inspectorClose" class="inspector-close" aria-label="关闭核素详情">×</button>
     <div id="inspectorContent"></div>
   </aside>
-
   <section class="container selected-section">
     <div class="section-heading comparison-heading">
-      <div>
-        <p class="eyebrow">NUCLEI COMPARISON</p>
-        <h2>核种比较</h2>
-      </div>
+      <div><p class="eyebrow">NUCLEI COMPARISON</p><h2>核种比较</h2></div>
       <div class="comparison-controls">
         <label>Δδ / ppm <input id="deltaPpmInput" type="number" step="0.001" value="0.100"></label>
-        <label>Add nucleus
-          <select id="addNucleusSelect"></select>
-        </label>
+        <label>Add nucleus <select id="addNucleusSelect"></select></label>
         <button id="addNucleusButton" class="plain-button">Add</button>
         <button id="clearPins" class="text-button">Clear</button>
       </div>
     </div>
-    <div id="selectedEmpty" class="empty-state">点击周期表元素或使用 Add nucleus 选择核种。</div>
+    <div id="selectedEmpty" class="empty-state">点击周期表元素打开核素详情，或使用 Add nucleus 直接加入比较。</div>
     <div class="comparison-scroll">
       <table id="comparisonTable" class="comparison-table">
-        <thead>
-          <tr>
-            <th>Nucleus</th><th>Spin</th><th>Abundance / %</th><th>γ/2π / MHz T<sup>−1</sup></th><th>Frequency</th><th>Relative sensitivity<br><small>¹³C = 1</small></th><th>Δν / Hz</th><th></th>
-          </tr>
-        </thead>
+        <thead><tr><th>Nucleus</th><th>Spin</th><th>Abundance / %</th><th>γ/2π / MHz T<sup>−1</sup></th><th>Frequency</th><th>Relative sensitivity<br><small>¹³C = 1</small></th><th>Δν / Hz</th><th></th></tr></thead>
         <tbody id="comparisonBody"></tbody>
       </table>
     </div>
-    <div id="frequencyBars" class="frequency-bars"></div>
   </section>
-
   <section class="container reference-section" id="signals">
     <div class="section-heading">
       <div><p class="eyebrow">SOLVENT SIGNALS</p><h2>氘代溶剂残余信号</h2></div>
-      <p class="section-note">残余 <sup>1</sup>H 来自含质子的同位素体或相关含质子物种，不代表理想完全氘代分子本身产生 <sup>1</sup>H 信号。</p>
+      <p class="section-note">Residual <sup>1</sup>H 来自含质子的同位素体或相关含质子物种，不表示理想完全氘代分子自身产生 <sup>1</sup>H 信号。</p>
     </div>
     <div class="solvent-browser">
       <div class="solvent-list" id="solventList"></div>
       <article class="solvent-viewer">
         <header class="compound-head">
-          <div class="structure-plain">
-            <img id="solventStructure" alt="">
-            <span id="solventStructureFallback" class="structure-fallback"></span>
-          </div>
+          <div class="structure-plain"><img id="solventStructure" alt=""></div>
           <div class="solvent-identification">
             <p class="eyebrow">SELECTED SOLVENT</p>
             <h3 id="solventName">—</h3>
             <p id="solventFormula" class="molecular-formula"></p>
             <p id="solventResidual" class="residual-species"></p>
           </div>
-          <div class="segmented spectrum-toggle" id="solventNucleusToggle">
-            <button class="active" data-nucleus="1H">¹H</button>
-            <button data-nucleus="13C">¹³C</button>
-          </div>
+          <div class="segmented spectrum-toggle" id="solventNucleusToggle"><button class="active" data-nucleus="1H">¹H</button><button data-nucleus="13C">¹³C</button></div>
         </header>
         <div class="stick-plot-wrap">
           <div class="stick-plot-label"><span id="solventPlotNucleus">¹H</span><span>δ / ppm</span></div>
@@ -177,49 +127,36 @@
     </div>
     <p class="reference-note">残余溶剂数据来自 Cambridge Isotope Laboratories NMR Solvent Data Chart。化学位移可随溶剂、浓度、温度及实验条件变化。</p>
   </section>
-
   <section class="atlas-wide impurity-section" id="impurities">
     <div class="section-heading impurity-heading">
       <div><p class="eyebrow">IMPURITY SIGNALS</p><h2>常见杂质跨溶剂比较</h2></div>
-      <p class="section-note">同一种杂质占一行；每个介质单元直接显示完整峰位、归属与多重性。</p>
+      <p class="section-note">同一种杂质占一行；六种氘代介质直接显示完整峰位、归属和多重性。</p>
     </div>
     <div class="impurity-toolbar">
       <input id="impuritySearch" type="search" placeholder="搜索 acetone, THF, pyridine…">
-      <div class="segmented" id="impurityNucleusToggle">
-        <button class="active" data-nucleus="1H">¹H</button>
-        <button data-nucleus="13C">¹³C</button>
-      </div>
+      <div class="segmented" id="impurityNucleusToggle"><button class="active" data-nucleus="1H">¹H</button><button data-nucleus="13C">¹³C</button></div>
     </div>
     <div class="impurity-scroll">
       <div class="impurity-matrix">
-        <div class="impurity-grid-head">
-          <span>Compound</span><span>CDCl₃</span><span>acetone-d₆</span><span>DMSO-d₆</span><span>CD₃CN</span><span>CD₃OD</span><span>D₂O</span>
-        </div>
+        <div class="impurity-grid-head"><span>Compound</span><span>CDCl₃</span><span>acetone-d₆</span><span>DMSO-d₆</span><span>CD₃CN</span><span>CD₃OD</span><span>D₂O</span></div>
         <div id="impurityGroups" class="impurity-groups"></div>
       </div>
     </div>
-    <p class="reference-note">Babij et al., <em>Org. Process Res. Dev.</em> 2016, 20, 661–667 及 Supporting Information；DOI 10.1021/acs.oprd.5b00417。结构与分子式在可用时通过 PubChem 解析，并不改写原文的峰位、归属或多重性数据。</p>
+    <p class="reference-note">Babij et al., <em>Org. Process Res. Dev.</em> 2016, 20, 661–667 及 Supporting Information；DOI 10.1021/acs.oprd.5b00417。结构与分子式属于额外化合物元数据，不改写原文峰位、归属或多重性。</p>
   </section>
-
   <section class="container source-section">
     <p class="eyebrow">DATA NOTES</p>
     <div class="source-grid">
-      <p><strong>Isotopes.</strong> 核种、自旋、天然丰度、γ/2π 与相对 receptivity 来自原始 <code>table400.tex</code>。</p>
+      <p><strong>Isotopes.</strong> 核种、自旋、天然丰度、γ/2π 与 relative sensitivity 来自原始 <code>table400.tex</code>。</p>
       <p><strong>Solvents.</strong> 氘代溶剂残余峰采用 Cambridge Isotope Laboratories 的 NMR Solvent Data Chart。</p>
       <p><strong>Impurities.</strong> 杂质峰采用 Babij 等论文及 Supporting Information 中六种常用氘代介质的 <sup>1</sup>H / <sup>13</sup>C 数据。</p>
     </div>
   </section>
 </main>
-
 <footer class="site-footer container">
-  <div class="site-footer-brand">
-    <a href="https://plastocyanin.org/">plast<span>o</span>cyanin<span>.</span></a>
-    <b>NMR Atlas</b>
-    <small>Interactive NMR reference</small>
-  </div>
+  <div class="site-footer-brand"><a href="https://plastocyanin.org/">plast<span>o</span>cyanin<span>.</span></a><b>NMR Atlas</b><small>Interactive NMR reference</small></div>
   <div class="footer-right">© <span id="currentYear">2026</span> wuhaifeng@ustc.edu.cn. All rights reserved.<br>本站项目说明与文字内容版权归作者所有，未经许可不得复制、转载或用于商业用途。</div>
 </footer>
-
 <script type="module" src="assets/app.js"></script>
 </body>
 </html>
