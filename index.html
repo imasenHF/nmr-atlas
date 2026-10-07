@@ -44,11 +44,11 @@
   <section class="container control-band" aria-label="磁场控制">
     <div class="field-control">
       <label for="fieldInput">B<sub>0</sub> / T</label>
-      <div class="input-line"><input id="fieldInput" type="number" min="0.002" max="50" step="0.00001" value="9.39464"><span>T</span></div>
+      <div class="input-line"><input id="fieldInput" type="number" min="0.00002" max="50" step="0.000001" value="9.39464"><span>T</span></div>
     </div>
     <div class="field-control">
       <label for="protonInput"><sup>1</sup>H frequency</label>
-      <div class="input-line"><input id="protonInput" type="number" min="0.1" max="2000" step="0.01" value="400.00"><span>MHz</span></div>
+      <div class="input-line"><input id="protonInput" type="number" min="0.001" max="2000" step="0.001" value="400.00"><span>MHz</span></div>
     </div>
     <div class="field-control nominal">
       <span class="control-label">CURRENT FIELD</span>
@@ -60,7 +60,7 @@
       <div id="presetButtons"></div>
     </div>
     <div class="field-slider">
-      <div class="slider-scale"><span>0.1 MHz</span><span>log frequency scale</span><span>2.0 GHz</span></div>
+      <div class="slider-scale"><span>1 kHz</span><span>log frequency scale</span><span>2.0 GHz</span></div>
       <input id="fieldSlider" aria-label="质子频率对数滑块" type="range" min="0" max="1000" step="1" value="837">
     </div>
   </section>
