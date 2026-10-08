@@ -505,7 +505,46 @@ NMR Atlas 已有多个高信息密度模块，1120 px 的默认正文宽度会�
 
 目的为保证 La、Hf 等多核素元素在黄金分割核素区内完整显示，不改变方格整体几何关系。
 
-## 21. 待检查项
+
+## 22. 2026-10-08 Workshop 关联、页头与周期表区域
+
+### Workshop 关联
+
+- 主站仓库新增 `_projects/nmr-atlas.md`；
+- NMR Atlas 归类为 reference / Reference Tool；
+- Workshop 入口使用 `/nmr-atlas/`；
+- 当前不设置为主页 featured 项目；
+- 主站 `PROJECT_INDEX.md` 与 `SITE_CONTEXT.md` 同步记录该项目。
+
+### 页头
+
+NMR Atlas 采用类似 SpinFront 的独立工具页头，不显示主站全局导航 Home / Workshop / Notebook / About / CV。
+
+页头只保留 NMR Atlas 自身的双层品牌：
+
+- plastocyanin. → 主站；
+- NMR Atlas → 当前工具首页。
+
+页面中的 WORKSHOP / NMR ATLAS breadcrumb 继续作为返回 Workshop 的入口。
+
+### 周期表区域
+
+- 周期表区域底色使用网站统一页面底色 `--bg`，不再随周期表 palette 使用独立 `--pt-bg`；
+- 周期表区域上下分隔线不再横跨整个 viewport；
+- 分隔线宽度与 `.atlas-wide` 一致：宽屏最大约 1680 px，中屏随 1360 px / 流式宽度收缩；
+- 周期表 palette 只影响元素方格、核素方格、边框与数据强调色。
+
+### 默认页面宽度
+
+此前常规 `.container` 已由 1120 px 改为 1280 px，但在宽屏下视觉变化仍偏小。当前进一步调整为：
+
+- 常规 `.container` 最大宽度：1440 px；
+- `.atlas-wide` 最大宽度：1680 px；
+- 1100 px 以下继续按既有流式规则收缩。
+
+这样磁场控制、核种比较和 Solvent Signals 等常规模块与超宽周期表/杂质矩阵之间的宽度差缩小，但仍保留两个层级。
+
+## 23. 待检查项
 
 - 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
 - impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
