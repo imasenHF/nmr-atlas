@@ -34,17 +34,24 @@ jobs:
           node <<'NODE'
           const fs = require('fs');
           const files = ['assets/app.js','assets/core.js','assets/periodic.js','assets/references.js'];
-          let bad = [];
+          // $() returns one Element; $$() returns a collection.
+          // Match direct .forEach calls on single-element selector results.
+          const invalid = /(?<!\$)\$\([^)]*\)\s*\.forEach\s*\(/g;
+          const badExample = "$('#paletteMenu .palette-option').forEach(x => x)";
+          const goodExample = "$$('#paletteMenu .palette-option').forEach(x => x)";
+          if (!badExample.match(invalid) || goodExample.match(invalid)) {
+            throw new Error('Selector validation self-test failed');
+          }
+          const bad = [];
           for (const file of files) {
-            const lines = fs.readFileSync(file, 'utf8').split('\n');
-            lines.forEach((line, i) => {
-              if (line.includes("$(") && line.includes(".forEach") && !line.includes("$(")) {
-                bad.push(`${file}:${i + 1}: ${line.trim()}`);
-              }
-            });
+            const source = fs.readFileSync(file, 'utf8');
+            for (const hit of source.matchAll(invalid)) {
+              const lineNo = source.slice(0, hit.index).split('\\n').length;
+              bad.push(`${file}:${lineNo}: ${hit[0]}`);
+            }
           }
           if (bad.length) {
-            console.error('Single-element selector used with forEach:\n' + bad.join('\n'));
+            console.error('Single-element selector used with forEach:\\n' + bad.join('\\n'));
             process.exit(1);
           }
           NODE
