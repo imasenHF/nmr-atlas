@@ -90,6 +90,8 @@ Inspector 清晰显示该元素所有可用核素的：
 
 点击 isotope 直接加入/移出 Nuclei Comparison；点击元素主体添加当前自旋筛选条件下天然丰度最高的可用 NMR isotope。
 
+核素被选中后仅在 Nuclei Comparison 中列示，周期表格不额外使用金色下边框或选中阴影；当前 palette 的核素颜色保持一致。
+
 ## 3. Nuclei Comparison
 
 核种比较区应同时显示：
