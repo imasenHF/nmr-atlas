@@ -181,16 +181,40 @@ export function renderComparison(){
   });
 }
 export function initComparison(){$('#deltaPpmInput').oninput=renderComparison}
+const PALETTES=[
+  {key:'wave',label:'Wave',group:'Reference',colors:['#2E58A4','#FFC000','#E3DED4']},
+  {key:'jacs',label:'JACS',group:'Scientific',colors:['#DCE8F0','#E9D8AF','#E5E7E8']},
+  {key:'muted',label:'Muted',group:'Scientific',colors:['#DCE5EC','#E8DDD2','#DFE6E1']},
+  {key:'pastel',label:'Pastel',group:'Prism',colors:['#7FA9CC','#E3BE88','#A9AFB5']},
+  {key:'classic',label:'Classic',group:'Prism',colors:['#D9E7F4','#F3DADA','#DFEDE1']},
+  {key:'set2',label:'Set2',group:'Matplotlib',colors:['#DCEFE9','#F5DED5','#E3E6F1']},
+  {key:'cividis',label:'Cividis',group:'Continuous',colors:['#DDE4ED','#EFE4B8','#E5E5DF']},
+  {key:'grayscale',label:'Grayscale',group:'Scientific',colors:['#E0E4E5','#D7D9DA','#ECEDEB']}
+];
+function paletteSwatches(colors,cls='palette-option-swatches'){return `<span class="${cls}">${colors.map(c=>`<i style="background:${c}"></i>`).join('')}</span>`}
+function applyPalette(key){
+  const p=PALETTES.find(x=>x.key===key)||PALETTES[0];
+  document.body.dataset.palette=p.key;
+  localStorage.setItem('nmr-atlas-palette',p.key);
+  $('#paletteName').textContent=p.label;
+  $('#paletteMini').innerHTML=p.colors.map(c=>`<i style="background:${c}"></i>`).join('');
+  $('#paletteMenu .palette-option').forEach(b=>b.classList.toggle('active',b.dataset.palette===p.key));
+}
 export function initPalette(){
-  const allowed=new Set(['wave','jacs','muted','pastel']);
+  const allowed=new Set(PALETTES.map(x=>x.key));
   const stored=localStorage.getItem('nmr-atlas-palette');
   const saved=allowed.has(stored)?stored:'wave';
-  if(stored!==saved)localStorage.setItem('nmr-atlas-palette',saved);
-  document.body.dataset.palette=saved;
-  $$('#paletteSwitch button').forEach(b=>{
-    b.classList.toggle('active',b.dataset.palette===saved);
-    b.onclick=()=>{document.body.dataset.palette=b.dataset.palette;localStorage.setItem('nmr-atlas-palette',b.dataset.palette);$$('#paletteSwitch button').forEach(x=>x.classList.toggle('active',x===b))};
-  });
+  const menu=$('#paletteMenu'),button=$('#paletteButton');
+  const groups=[...new Set(PALETTES.map(x=>x.group))];
+  menu.innerHTML=groups.map(g=>{
+    const items=PALETTES.filter(x=>x.group===g).map(p=>`<button type="button" class="palette-option" role="option" data-palette="${p.key}"><span class="palette-option-name">${p.label}</span>${paletteSwatches(p.colors)}</button>`).join('');
+    return `<div class="palette-group"><div class="palette-group-title">${g}</div><div class="palette-options">${items}</div></div>`;
+  }).join('');
+  applyPalette(saved);
+  button.onclick=()=>{const open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open))};
+  $('#paletteMenu .palette-option').forEach(b=>b.onclick=()=>{applyPalette(b.dataset.palette);menu.hidden=true;button.setAttribute('aria-expanded','false')});
+  document.addEventListener('click',e=>{if(!$('#paletteSwitch').contains(e.target)){menu.hidden=true;button.setAttribute('aria-expanded','false')}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){menu.hidden=true;button.setAttribute('aria-expanded','false')}});
 }
 export function updateUrl(){const p=new URLSearchParams();p.set('field',fmt(state.field,state.field<.1?6:5));if(state.pins.length)p.set('nuclei',state.pins.map(x=>x.key).join(','));history.replaceState(null,'',location.pathname+'?'+p.toString()+location.hash)}
 export function restoreUrl(){const p=new URLSearchParams(location.search);if(p.has('field'))state.field=Number(p.get('field'))||state.field;const keys=(p.get('nuclei')||'1H,13C,19F,31P').split(',').filter(Boolean);state.pins=[];for(const k of keys){const n=allNuclei().find(x=>x.key===k);if(n)state.pins.push(n)}}
