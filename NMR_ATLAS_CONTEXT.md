@@ -576,21 +576,24 @@ Continuous：
 
 ## 26. 2026-10-08 配色选择器运行故障修复
 
-新增下拉式 palette picker 后，页面出现 `$(...).forEach is not a function` / palette 初始化失败，导致 `app.js` 的统一初始化流程中断，动态数据区域不再渲染。
+新增下拉式 palette picker 后，页面出现 `$(...).forEach is not a function`，导致 `app.js` 初始化流程中断，动态数据区域不再渲染。
 
 根因：
 
 - `$()` 是 `querySelector`，返回单个 Element；
-- `$()` 是 `querySelectorAll` 的数组封装；
-- palette picker 中两处代码误写为 `$('#paletteMenu .palette-option').forEach(...)`，对单个 Element 调用 `forEach`。
+- `$$()` 是 `querySelectorAll` 的数组封装；
+- palette picker 中两处代码实际仍为 `$('#paletteMenu .palette-option').forEach(...)`，对单个 Element 调用 `forEach`；
+- 前一轮自动替换时，JavaScript `String.replace` 的 replacement string 将 `$$` 解释为单个字面量 `$`，因此虽然任务记录写成已修复，仓库代码并未真正变为 `$$()`。
 
-已修正为：
+本次已经直接验证仓库源码，两处均改为：
 
-`$('#paletteMenu .palette-option').forEach(...)`
+`$$('#paletteMenu .palette-option').forEach(...)`
 
-同时统一 `app.js / periodic.js / references.js` 对 `core.js` 的版本查询参数，避免同一 ES module 因不同 query string 被浏览器视为不同模块实例，造成 state / data 分裂。
+并增加 Pages workflow 静态检查：如果 JS 中出现单元素 `$()` 后直接调用 `.forEach`，部署任务会失败，防止同类错误再次上线。
 
-错误页提示也改为“页面初始化失败”，不再把所有运行错误误写为 DecompressionStream 问题。
+同时统一 `app.js / periodic.js / references.js` 的 module 版本参数，并更新静态资源版本，避免浏览器继续使用故障版本缓存。
+
+错误页提示保持为“页面初始化失败”，不再把任意前端运行错误误写为 DecompressionStream 问题。
 
 ## 27. 待检查项
 
