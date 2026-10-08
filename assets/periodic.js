@@ -1,3 +1,4 @@
+import{inspectorIsotopes}from'./isotope-details.js?v=20261009-all-isotopes1';
 import{$,$$,state,elements,gammaH,MHZ_MIN,MHZ_MAX,groupMapSP,fmt,displayNumber,compactNumber,frequencyMhz,currentTableUnit,frequencyInUnit,frequencyText,mhzToSlider,sliderToMhz,nuclideLabel,parseNumber}from'./core.js?v=20261008-palettepicker3';
 
 const presets=[1,5,20,43,60,80,100,300,400,500,600,800,1000,1200];
@@ -160,14 +161,31 @@ export function initFilters(){
   });
   $('#nucleusSearch').oninput=e=>{state.query=e.target.value;applyFilter()};
 }
+function inspectorSpinText(spin){
+  if(spin===null||spin===undefined||spin==='')return '—';
+  if(typeof spin==='string')return spin;
+  if(!Number.isFinite(spin)||spin<0)return '—';
+  return Number.isInteger(spin)?String(spin):`${Math.round(spin*2)}/2`;
+}
+function inspectorAbundanceText(abundance){
+  const n=Number(abundance);
+  if(!Number.isFinite(n))return '—';
+  return n>0&&n<0.01?String(n):displayNumber(n,2);
+}
 export function renderInspector(){
   if(!state.inspector)return;
   const{element:e,active}=state.inspector;
-  const body=e.isotopes.filter(i=>i.spin).map(i=>{
-    const k=keyFor(e,i),f=frequencyMhz(i.gamma),pin=state.pins.some(p=>p.key===k);
-    return`<tr${active===k?' class="active"':''}><td class="nucleus">${nuclideLabel(i.mass,e.symbol)}</td><td>${i.spin||'—'}</td><td>${displayNumber(i.abundance,2)}</td><td>${displayNumber(i.gamma,2)}</td><td>${frequencyText(f)}</td><td>${compactNumber(i.receptivity)}</td><td>${pin?'●':''}</td></tr>`;
+  const isotopes=inspectorIsotopes(e);
+  const body=isotopes.map(i=>{
+    const k=keyFor(e,i),hasSpin=inspectorSpinText(i.spin)!=='0'&&inspectorSpinText(i.spin)!=='—';
+    const f=hasSpin?frequencyMhz(i.gamma):null;
+    const pin=state.pins.some(p=>p.key===k);
+    const gamma=hasSpin&&i.gamma!==null&&i.gamma!==undefined&&i.gamma!==''?displayNumber(i.gamma,2):'—';
+    const sensitivity=hasSpin&&i.receptivity!==null&&i.receptivity!==undefined&&i.receptivity!==''?compactNumber(i.receptivity):'—';
+    return `<tr${active===k?' class="active"':''}><td class="nucleus">${nuclideLabel(i.mass,e.symbol)}</td><td>${inspectorSpinText(i.spin)}</td><td>${inspectorAbundanceText(i.abundance)}</td><td>${gamma}</td><td>${f==null?'—':frequencyText(f)}</td><td>${sensitivity}</td><td>${pin?'●':''}</td></tr>`;
   }).join('');
-  $('#inspectorContent').innerHTML=`<div class="inspector-head"><div class="inspector-symbol">${e.symbol}</div><div><h3>${e.name}</h3><p>Z = ${e.atomic_number}${e.shift_range?` · ${e.shift_range} ppm`:''}</p></div></div><table class="inspector-table"><thead><tr><th>Nucleus</th><th>I</th><th>Abund. / %</th><th>γ/2π</th><th>Frequency</th><th>R</th><th></th></tr></thead><tbody>${body}</tbody></table>`;
+  const rows=body||'<tr><td colspan="7">No isotopes with recorded mass numbers</td></tr>';
+  $('#inspectorContent').innerHTML=`<div class="inspector-head"><div class="inspector-symbol">${e.symbol}</div><div><h3>${e.name}</h3><p>Z = ${e.atomic_number}${e.shift_range?` · ${e.shift_range} ppm`:''}</p></div></div><table class="inspector-table"><thead><tr><th>Nucleus</th><th>I</th><th>Abund. / %</th><th>γ/2π</th><th>Frequency</th><th>R</th><th></th></tr></thead><tbody>${rows}</tbody></table><p class="inspector-note">Listed isotopes in the available data (${isotopes.length}); I = 0 has no NMR frequency. — indicates an unavailable value.</p>`;
   if(lastAnchor)positionInspector(lastAnchor);
 }
 export function closeInspector(){clearTimeout(hoverOpenTimer);clearTimeout(hoverCloseTimer);state.inspector=null;const p=$('#isotopeInspector');if(p)p.hidden=true}

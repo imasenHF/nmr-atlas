@@ -1,5 +1,5 @@
 import{$,state,loadData}from'./core.js?v=20261008-palettepicker3';
-import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,initPalette,restoreUrl,setField,renderComparison}from'./periodic.js?v=20261008-palettepicker3';
+import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,initPalette,restoreUrl,setField,renderComparison}from'./periodic.js?v=20261009-all-isotopes1';
 import{initSolvents,initImpurities}from'./references.js?v=20261008-palettepicker3';
 try{
   await loadData();

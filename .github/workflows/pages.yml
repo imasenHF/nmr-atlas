@@ -27,8 +27,24 @@ jobs:
         run: |
           node --check assets/core.js
           node --check assets/periodic.js
+          node --check assets/isotope-details.js
           node --check assets/references.js
           node --check assets/app.js
+      - name: Check inspector isotope catalogue
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const source = fs.readFileSync('assets/isotope-details.js','utf8');
+          const {isotopeCatalogue,inspectorIsotopes} = await import('data:text/javascript,'+encodeURIComponent(source));
+          const se=inspectorIsotopes({symbol:'Se',isotopes:[{mass:'77',spin:'1/2',gamma:8.13,receptivity:1}]});
+          const c=inspectorIsotopes({symbol:'C',isotopes:[{mass:'13',spin:'1/2',gamma:10.71,receptivity:1}]});
+          if(se.length!==7 || se.find(i=>Number(i.mass)===74)?.spin!==0 || se.find(i=>Number(i.mass)===77)?.receptivity!==1)
+            throw new Error('Selenium isotope merge failed');
+          if(c.length!==3 || c.find(i=>Number(i.mass)===12)?.spin!==0 || c.find(i=>Number(i.mass)===13)?.gamma!==10.71)
+            throw new Error('Carbon isotope merge failed');
+          if(Object.values(isotopeCatalogue).flat().some(i=>i.mass<=0 || (i.spin===0&&i.gamma!==null)))
+            throw new Error('Invalid isotope placeholder or spin-zero gamma');
+          NODE
       - name: Check selector collection usage
         run: |
           node <<'NODE'

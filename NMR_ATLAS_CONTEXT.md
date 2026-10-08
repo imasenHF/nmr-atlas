@@ -79,6 +79,8 @@ Spin filter 必须作用于核素级：
 
 元素或核素 hover 约 300–400 ms 后显示局部 inspector，不放大整张周期表；离开元素和 inspector 后短延迟关闭。核素格不使用浏览器原生 `title` 提示，保留可访问名称（`aria-label`），悬浮时只显示自定义 inspector。
 
+Inspector 合并当前 NMR 核素表和用户提供的 `initialize_global_variables.py` 同位素条目，按质量数升序列出来源中具有有效质量数的全部记录（包括 I = 0、低天然丰度及来源收录的其他核素）。两者重合时以现有 NMR 核素表字段为准；只扩展 inspector，周期表方格、核种筛选、选择状态和 Nuclei Comparison 数据来源均不变。补充记录的 γ/2π 由文件中的核 g 因子及 μ_N/h 换算；I = 0 无可观测 NMR 频率，未给出的 R 显示“—”。质量数 0 的占位行不视为实际同位素，所附文件不是完整的放射性核素数据库。
+
 Inspector 清晰显示该元素所有可用核素的：
 
 - isotope；

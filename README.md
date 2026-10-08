@@ -12,6 +12,7 @@ NMR Atlas 是 plastocyanin Workshop 下的交互式 NMR 参考工具，当前包
 ## Data sources
 
 - Isotope parameters: source dataset from `table400.tex` supplied for this project.
+- Hover inspector isotope list: supplementary nuclide entries from user-provided `initialize_global_variables.py`, merged with the existing NMR table (which takes precedence for overlapping values). The file is not a complete isotope database; zero-spin nuclei have no NMR frequency and unavailable sensitivity values remain blank.
 - Cambridge Isotope Laboratories, *NMR Solvent Data Chart*.
 - Babij, N. R. et al. *Org. Process Res. Dev.* **2016**, 20, 661–667. DOI: 10.1021/acs.oprd.5b00417, including Supporting Information.
 
