@@ -76,7 +76,7 @@ function makeElement(e,p={}){
   bindHover(m,e);
   m.onclick=()=>togglePin(e,primaryIsotope(e));
   b.appendChild(m);
-  const stack=document.createElement('div');stack.className='isotope-stack';
+  const stack=document.createElement('div');stack.className=`isotope-stack count-${Math.min(4,e.isotopes.length)}`;
   e.isotopes.forEach(i=>{
     const c=document.createElement('button'),cls=spinClass(i),f=frequencyInUnit(frequencyMhz(i.gamma));
     c.className=`isotope-cell ${cls}`;c.dataset.spinClass=cls;c.dataset.symbol=e.symbol;c.dataset.mass=i.mass;c.dataset.gamma=i.gamma;
