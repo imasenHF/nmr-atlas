@@ -2,7 +2,7 @@
 
 更新日期：2026-10-08
 
-本文件记录 NMR Atlas 当前有效需求、设计决定、数据边界和待检查事项。后续修改应同步更新本文件；只保留仍然有效的约束，不把已经放弃的方案继续当作要求。
+本文件保存当前有效的功能、设计决定、数据边界与待检查事项。实际代码和部署检查决定当前实现状态；已废止的方案由 Git 历史追溯，不继续追加多轮修订记录。
 
 ## 1. 项目定位
 
@@ -51,31 +51,18 @@ NMR Atlas 是 plastocyanin Workshop 下的独立 NMR 交互参考工具。
 
 ### 2.3 几何和视觉
 
-延续原 LaTeX 周期表的几何特征：
-
-- 每个元素单元保持接近正方形；
-- 元素主区和核素区采用黄金分割关系，约 38.2% : 61.8%；
-- 多核素在右侧 61.8% 区域内横向分列，保持原 table400.tex 的 HalfMiddle / HalfRight 几何关系；
-- 不通过持续压小字号解决屏幕变窄；
-- 元素符号区不使用大面积深色块，改为与 plastocyanin 主题一致的低饱和蓝灰/青灰；
-- I = 1/2 使用低饱和金色系；
-- I > 1/2 使用浅蓝灰系；
-- selected / hover 继续使用主题蓝和主题金。
-
-宽屏不铺满 100vw。周期表应有最大宽度，并保留适当左右留白。
+- 采用约 38.2% : 61.8% 的元素主区与核素区比例；多核素在右侧横向分列，保留 table400.tex 的几何关系。
+- 方格接近正方形，最大宽度受页面容器约束，不把周期表直接铺满 viewport。
+- 核素字号随同一元素核素数量调整：1 个约 10px，2 个约 9px，3 个及以上约 7.8px。
+- 周期表有独立的配色选择器，颜色只作用于周期表数据区，不改变主站品牌色。详细选项见第 8 节。
 
 ### 2.4 响应式布局
 
-采用“重排周期表区块”而非“不断缩小单元格”的响应式思路，参考 ptable.com 的布局行为。
-
-建议行为：
-
-- 宽屏：标准 18 group 完整周期表；
-- 中等宽度：保持单元可读尺寸，d block 独立下移；
-- 更窄：s/p、d、f block 分段排布；
-- 手机：分段周期表，可局部横向滚动；
-- 各模式尽量保持元素单元黄金分割结构；
-- 宽屏完整显示时仍保留页面两侧留白。
+按现有 `assets/periodic.js` 的阈值分段：
+- `innerWidth >= 1550`：18 group 完整 Full 周期表。
+- `760 <= innerWidth < 1550`：Split，s/p、d、f 分区。
+- `innerWidth < 760`：Sectioned，分段周期表，可局部横向滚动。
+- Full 版主表 grid row 2–7，row 8 留约半个 cell 间隙，lanthanides / actinides 位于 row 9 / 10；分段布局保持相近的分区间隔。
 
 ### 2.5 自旋筛选
 
@@ -181,61 +168,12 @@ Solvent Signals 保留：
 
 ## 6. Impurity Signals
 
-采用单层 cross-solvent matrix，不保留下拉展开详情。
-
-### 6.1 结构
-
-每种 impurity 占一行：
-
-`Compound | CDCl3 | acetone-d6 | DMSO-d6 | CD3CN | CD3OD | D2O`
-
-同一种杂质在六种氘代介质中的数据横向比较。
-
-### 6.2 每个 solvent cell
-
-直接显示全部可用：
-
-- shift；
-- assignment/site；
-- multiplicity；
-- J（来源 multiplicity 字符串中已有时原样保留）。
-
-删除：
-
-- `+N signals` 摘要；
-- `click for assignments`；
-- resonance 数量说明；
-- 展开箭头；
-- 展开详情区域。
-
-每个 cell 内按高 ppm → 低 ppm 排序。
-
-不需要在每一条峰位前重复写 δ；区域标题或表头统一说明 chemical shift / ppm。
-
-### 6.3 Compound 列
-
-Compound 单元显示：
-
-- 结构图；
-- compound name；
-- molecular formula；
-- CAS 可用时显示。
-
-结构图无边框、无背景。
-
-不得同时显示真实结构图和额外的 `structure` placeholder。
-
-### 6.4 表格尺寸
-
-不通过缩小正文把 7 列硬塞进窗口。
-
-- Compound 列约 230–260 px；
-- 各 solvent 列设置合理最小宽度；
-- 屏幕不足时矩阵整体横向滚动；
-- 表头 sticky；
-- 第一列 sticky；
-- 行高由该 impurity 实际信号数量决定；
-- 正文字号约 12–13 px，不使用当前过小的 9–10 px 主文本。
+- 采用单层 cross-solvent matrix，一个 impurity 一行；列为 `Compound | CDCl3 | acetone-d6 | DMSO-d6 | CD3CN | CD3OD | D2O`。
+- 各 solvent cell 直接列出全部可靠的 shift、assignment/site、multiplicity 与来源给出的 J，不显示 `+N signals`、展开箭头、`click for assignments` 或额外详情区域；每格按高 ppm 到低 ppm 排序。
+- 每条 resonance 使用两行：第一行 `δ / ppm | assignment`，第二行 `multiplicity, J / Hz` 并占满宽度；不强制三列同排造成溢出。
+- 图例集中标明 `δ / ppm | assignment | multiplicity, J / Hz`，峰位前不重复写 δ。
+- Compound 列展示结构、名称、formula、可用时的 CAS；图片无框、不展示空 `structure` 占位。未取得的数据不补造。
+- Compound 列约 230–260 px；溶剂列给出可读宽度，整体可水平滚动；表头与第一列 sticky，字号不通过压缩至 9–10px 来硬塞七列。
 
 ## 7. 数据和来源
 
@@ -257,347 +195,21 @@ Compound 单元显示：
 
 结构、formula、CAS/SMILES 属于额外元数据。通过 PubChem 等来源获取时，应与文献峰数据区分；网页加载失败时不得出现误导性的结构占位内容。
 
-## 8. 当前实施目标
-
-本轮需要全部落实：
-
-1. 更新本文件并作为当前设计记录；
-2. 周期表重新实现黄金分割元素单元；
-3. 优化字体和数值精度，不删除现有科学信息；
-4. 周期表响应式改为 Full / Split / Sectioned 布局；
-5. 调整元素和核素配色；
-6. 增加 isotope inspector；
-7. 修正 Spin filter；
-8. Nuclei Comparison 增加 abundance、relative sensitivity，并合并 ppm/Hz；
-9. Solvent selector 两列；
-10. Solvent structure 无框、增加 formula 和 residual isotopologue 说明；
-11. Impurity matrix 改为单层完整 assignment；
-12. 去除 impurity 的展开逻辑和 structure placeholder；
-13. 品牌副标题使用 NMR Atlas；
-14. 检查 GitHub Pages 构建和线上预览状态。
-
-## 9. 本轮实现状态
-
-已实施：
-
-- 页面品牌副标题已改为 NMR Atlas，plastocyanin. 与 NMR Atlas 使用独立链接；
-- 周期表保留原有核素参数，元素区/核素区按约 38.2% : 61.8% 布局；
-- 宽屏采用完整 18 group，较窄屏将 s/p、d、f 区块拆分显示；
-- 周期表数值精度统一，frequency 单位移到表外；
-- Spin filter 按核素筛选；
-- 增加元素/核素 inspector；
-- Nuclei Comparison 已加入 abundance、γ/2π、frequency、relative sensitivity 和公共 Δδ→Δν；
-- 独立 ppm/Hz 区域已移除；
-- Solvent selector 改为两列，增加 formula 和 residual protonated isotopologue/species 说明；
-- Solvent structure 改为无框显示；
-- Impurity Signals 改为单层矩阵，六种介质直接显示完整 shift、assignment 和 multiplicity；
-- Impurity 展开详情、+N signals、click for assignments 和 structure placeholder 已移除；
-- Impurity 主表增加 sticky header / first column 和较大的正文尺寸；
-- 代码拆分为 core / periodic / references 模块；
-- GitHub Pages workflow 已启用并可触发部署。
-
-
-## 11. 2026-10-08 第二轮界面修订
-
-以下要求覆盖前文与之冲突的旧表述：
-
-### 周期表单元
-
-- 元素/核素方格继续保留 abundance、当前 frequency、relative sensitivity。
-- 方格内部移除 `I` 与 `γ/2π` 数值；这两项保留在 hover inspector / comparison 中。
-- 周期表外设置明确图例，说明方格各行数值含义与统一单位。
-- 元素符号与 isotope 字号略微降低，避免多核素元素溢出。
-- f block 与主表的垂直间距约为一个元素方格边长的 1/2。
-- 提供多个周期表配色方案并可即时切换；必须包含 Wave 方案。配色切换只作用于周期表数据区，不改变主站整体品牌色。
-
-### 周期表交互
-
-- 元素/核素详细信息改为 hover 触发，不再依赖点击打开。
-- hover 使用短延迟，目标约 300–400 ms，避免指针经过时频繁弹出。
-- 离开元素和 inspector 后短延迟关闭。
-- 点击 isotope 直接加入/移出 Nuclei Comparison。
-- 点击元素主体时添加该元素最主要的可用 NMR isotope（按天然丰度优先）。
-- inspector 为只读详情，显示 I、abundance、γ/2π、frequency、relative sensitivity。
-
-### Nuclei Comparison
-
-- 删除 Add nucleus 下拉框与 Add 按钮；核种添加只通过周期表点击完成。
-- 控制区只保留 `Δδ / ppm` 输入，默认值为 1。
-- 各行仍保留删除按钮。
-
-### Solvent Signals
-
-- 结构图继续无框显示，并处理 PubChem PNG 白底的视觉问题；显示尺寸增大并裁掉明显白边。
-- chemical-shift 棒状图支持鼠标滚轮缩放横轴，围绕指针位置缩放。
-- 双击谱图恢复完整横轴范围。
-- 页面只保留必要的科学说明和操作提示，删除空泛说明文字。
-
-### Impurity Signals
-
-- 删除标题右侧“同一种杂质占一行……”等说明性句子。
-- 删除页面中其他没有数据含义、操作含义或来源含义的类似文字。
-- 每个 solvent cell 的 signal 改为更充分利用横向空间的布局：shift / assignment / multiplicity(J) 三列或等效结构，不把前两项挤在左侧后留下大面积空白。
-- solvent 列适当加宽，宁可整体横向滚动。
-- 表头 solvent 名称显著增大。
-- compound structure 放大并通过裁剪/混合方式减少 PNG 白边和白底视觉。
-- 增加矩阵图例，明确每条记录的字段：`δ / ppm | assignment | multiplicity, J / Hz`。
-
-### 品牌链接
-
-- 页头 plastocyanin. 与 NMR Atlas 必须是两个独立链接。
-- plastocyanin. 链接主站；NMR Atlas 链接当前 NMR Atlas 首页。
-- 页尾 NMR Atlas 也必须可点击。
-- 页尾品牌链接增加明确 hover 文字变色效果。
-
-## 12. 第二轮实现状态
-
-已实施：
-
-- 周期表方格移除 I 与 γ/2π，仅保留 isotope、abundance、frequency、relative sensitivity；
-- 周期表外增加 CELL DATA 图例，I 与 γ/2π 改由 hover inspector 查看；
-- 元素符号和 isotope 字号降低，避免多核素元素溢出；
-- 增加 Wave / Atlas / Mineral / Mono 四套周期表配色，可即时切换并保存在浏览器；
-- 元素/核素详情改为约 340 ms hover 触发，离开后短延迟关闭；
-- 点击 isotope 直接加入/移出 Nuclei Comparison；点击元素主体添加当前筛选条件下天然丰度最高的可用 NMR isotope；
-- Full layout 的 f block 与主表之间改为约 0.5 个方格边长的间距；分段布局各 block 也采用约 0.5 cell 的垂直节奏；
-- Nuclei Comparison 移除 Add nucleus 下拉框、Add 和 Clear 控件，只保留 Δδ / ppm，默认值改为 1；
-- Solvent structure 改用较大 PubChem 图并通过裁剪缩放和 multiply 混合减弱白底/白边；
-- Solvent chemical-shift plot 支持滚轮围绕指针缩放，双击恢复完整范围；
-- Impurity 标题区删除空泛说明；
-- Impurity matrix 增加字段图例：δ / ppm、assignment、multiplicity/J；
-- Impurity solvent 表头增大；
-- Impurity signal 改为 shift / assignment / multiplicity 三列同行布局，扩大 solvent 列宽并取消内部固定高度滚动；
-- Impurity compound structure 放大并减弱白底/白边；
-- 页头 plastocyanin. 与 NMR Atlas 已拆为独立链接；
-- 页尾 NMR Atlas 已增加独立链接，品牌链接增加 hover 变色；
-- Pages workflow 增加 JavaScript syntax check，在部署前检查 core / periodic / references / app 四个模块。
-
-
-## 14. 2026-10-08 运行故障与品牌修订
-
-### 运行故障
-
-第二轮修改后线上页面动态数据未加载。已定位为 `assets/references.js` 的运行前语法错误：
-
-- 错误对象键写法：`{1H:[12,0],13C:[220,0]}`
-- 修正为：`{'1H':[12,0],'13C':[220,0]}`
-
-该错误会使 ES module 在解析阶段终止，导致 `app.js` 无法继续执行，因此周期表、核种比较、溶剂和杂质动态数据同时消失。
-
-修正后同时给入口脚本与内部 module import 增加同一版本查询参数，避免浏览器继续使用修复前的缓存模块。
-
-### 品牌颜色与交互
-
-NMR Atlas 的页头、页尾品牌严格跟随主站当前模板和 `assets/css/section-brand.css`：
-
-- 默认主体文字：`#203139`；
-- hover / active / keyboard focus：主体文字改为 `#355c7d`，并显示细下划线；
-- `plastocyanin.` 中品牌金色保持 `#b68c37`；
-- 按主站当前模板，`plastocyanin.` 的字母 `o` 与末尾圆点保持金色，hover 时仍保持金色；
-- `NMR Atlas` 不使用金色字母，默认全部为深蓝灰，交互时整体变为主题蓝；
-- 页头图标、`plastocyanin.`、`NMR Atlas` 的链接语义与主站栏目品牌一致；
-- 页尾 `plastocyanin.` 与 `NMR Atlas` 采用与主站 footer brand 相同的默认色、hover 色与下划线反馈。
-
-
-## 16. 2026-10-08 周期表配色、f 区间距与杂质行布局
-
-本节覆盖前述配色与间距实现状态中的不准确描述。
-
-### Wave 配色
-
-Wave 不再使用网页自行拟定的近似色，直接采用 `table400.tex` 中定义的颜色：
-
-- element / `back0`: `#2E58A4`
-- element text / `front0`: `#FFFFFF`
-- I = 1/2 / `back2`: `#FFC000`
-- I = 1/2 text / `front2`: `#002060`
-- I > 1/2 / `back1`: `#E3DED4`
-- I > 1/2 text / `front1`: `#002060`
-- outline / `outline1`: `#002060`
-- accent / `ciqtekBlue`: `#0068B7`
-- periodic-table background approximates `backfill!5` using `#F8FBFC`.
-
-### 其他配色
-
-其他周期表方案直接参考 SpinPlot 当前调色板定义：
-
-- JACS：以 `jacs` palette 的 `#1F5A85 / #C49A42 / #6E7378` 为主要映射；
-- Muted：以 `prism_muted` palette 的 `#4F7291 / #AA8258 / #747A7F` 为主要映射；
-- Pastel：以 `prism_pastel` palette 的 `#7FA9CC / #E3BE88 / #A9AFB5` 为主要映射。
-
-旧的 Atlas / Mineral / Mono 周期表方案取消。
-
-### f 区间距
-
-此前 Full layout 虽设置了 0.5 cell gap，但行号仍保留一个未使用的完整 cell row，实际形成约 1.5 cell 的空白。本次修正：
-
-- 主表占 grid row 2–7；
-- row 8 为 `0.5 × cell` 的间隔；
-- lanthanides 放 row 9；
-- actinides 放 row 10。
-
-因此主表末行到第一条 f block 的实际垂直间距约为半个元素方格边长。
-
-### Impurity Signals 两行布局
-
-为避免 assignment、multiplicity 和 J 在较窄 solvent cell 中溢出，每条 resonance 固定使用两行：
-
-第一行：
-`δ / ppm | assignment`
-
-第二行：
-`multiplicity, J / Hz`
-
-第二行占用该 resonance cell 的完整可用宽度，不再与 assignment 强制三列同行。
-
-
-## 18. 2026-10-08 说明文字精简与配色调整
-
-### 页面说明文字
-
-- 首页标题下方的总括性说明句删除，不再重复解释 NMR Atlas 功能范围。
-- 页面底部 DATA NOTES 整块删除；数据来源继续保留在各功能模块附近，不再额外重复汇总。
-- Solvent Signals 标题右侧说明改为：`Residual ¹H 信号来自于未完全氘代的同位素物种。`
-
-### JACS / Muted 配色
-
-保留 SpinPlot 中 JACS 与 prism_muted 的色相来源，但不再把 SpinPlot 曲线色直接作为大面积周期表底色。周期表需要更浅、更适合高密度文字阅读的 tint 版本。
-
-JACS：
-- element: `#DCE8F0`
-- I = 1/2: `#E9D8AF`
-- I > 1/2: `#E5E7E8`
-- outline: `#8EA6B6`
-- accent: `#1F5A85`
-
-Muted：
-- element: `#DCE5EC`
-- I = 1/2: `#E8DDD2`
-- I > 1/2: `#DFE6E1`
-- outline: `#96A7A1`
-- accent: `#56888A`
-
-两套方案均使用深蓝灰正文文字，避免此前深色块、棕色块和深灰块同时出现导致周期表视觉过重。
-
-
-## 20. 2026-10-08 默认内容宽度与核素符号尺寸
-
-### 默认内容宽度
-
-NMR Atlas 已有多个高信息密度模块，1120 px 的默认正文宽度会让核种比较、溶剂浏览等区域显得过窄，同时周期表和杂质矩阵又使用更宽布局，页面宽度层级不一致。
-
-当前统一为：
-
-- 常规 `.container` 最大宽度：1280 px；
-- `.atlas-wide` 最大宽度：1680 px；
-- 1550 px 以下的 wide 区域上限：1360 px；
-- 小屏继续使用流式宽度。
-
-这样首页、磁场控制、核种比较、Solvent Signals 与页头页尾获得更大的常规内容区；周期表和 Impurity Signals 仍保留独立 wide 层级。
-
-### 核素符号
-
-核素符号继续缩小，并根据同一元素实际核素数量自适应：
-
-- 1 个核素：约 10 px；
-- 2 个核素：约 9 px；
-- 3 个及以上核素：约 7.8 px，并减少左右 padding 与字间距。
-
-目的为保证 La、Hf 等多核素元素在黄金分割核素区内完整显示，不改变方格整体几何关系。
-
-
-## 22. 2026-10-08 Workshop 关联、页头与周期表区域
-
-### Workshop 关联
-
-- 主站仓库新增 `_projects/nmr-atlas.md`；
-- NMR Atlas 归类为 reference / Reference Tool；
-- Workshop 入口使用 `/nmr-atlas/`；
-- 当前不设置为主页 featured 项目；
-- 主站 `PROJECT_INDEX.md` 与 `SITE_CONTEXT.md` 同步记录该项目。
-
-### 页头
-
-NMR Atlas 采用类似 SpinFront 的独立工具页头，不显示主站全局导航 Home / Workshop / Notebook / About / CV。
-
-页头只保留 NMR Atlas 自身的双层品牌：
-
-- plastocyanin. → 主站；
-- NMR Atlas → 当前工具首页。
-
-页面中的 WORKSHOP / NMR ATLAS breadcrumb 继续作为返回 Workshop 的入口。
-
-### 周期表区域
-
-- 周期表区域底色使用网站统一页面底色 `--bg`，不再随周期表 palette 使用独立 `--pt-bg`；
-- 周期表区域上下分隔线不再横跨整个 viewport；
-- 分隔线宽度与 `.atlas-wide` 一致：宽屏最大约 1680 px，中屏随 1360 px / 流式宽度收缩；
-- 周期表 palette 只影响元素方格、核素方格、边框与数据强调色。
-
-### 默认页面宽度
-
-此前常规 `.container` 已由 1120 px 改为 1280 px，但在宽屏下视觉变化仍偏小。当前进一步调整为：
-
-- 常规 `.container` 最大宽度：1440 px；
-- `.atlas-wide` 最大宽度：1680 px；
-- 1100 px 以下继续按既有流式规则收缩。
-
-这样磁场控制、核种比较和 Solvent Signals 等常规模块与超宽周期表/杂质矩阵之间的宽度差缩小，但仍保留两个层级。
-
-
-## 24. 2026-10-08 周期表配色选择器
-
-周期表配色不再使用横向平铺按钮。当前改为紧凑的下拉式 palette picker，按钮只显示当前配色名称、三色预览和展开箭头；点击后显示分组菜单。
-
-当前提供 8 套方案：
-
-Reference：
-- Wave：直接来自 `table400.tex`。
-
-Scientific：
-- JACS；
-- Muted；
-- Grayscale。
-
-Prism：
-- Pastel；
-- Classic。
-
-Matplotlib：
-- Set2。
-
-Continuous：
-- Cividis。
-
-除 Wave 外，其余方案的色相来源参考 SpinPlot 已有 palette，但根据周期表高信息密度场景使用更浅的 tint 映射，避免将 SpinPlot 曲线颜色直接作为大面积方格底色。
-
-配色选择继续写入 `localStorage`，刷新页面后保留上次选择。菜单支持点击外部或 Escape 关闭。
-
-
-## 26. 2026-10-08 配色选择器运行故障修复
-
-新增下拉式 palette picker 后，页面出现 `$(...).forEach is not a function`，导致 `app.js` 初始化流程中断，动态数据区域不再渲染。
-
-根因：
-
-- `$()` 是 `querySelector`，返回单个 Element；
-- `$$()` 是 `querySelectorAll` 的数组封装；
-- palette picker 中两处代码实际仍为 `$('#paletteMenu .palette-option').forEach(...)`，对单个 Element 调用 `forEach`；
-- 前一轮自动替换时，JavaScript `String.replace` 的 replacement string 将 `$$` 解释为单个字面量 `$`，因此虽然任务记录写成已修复，仓库代码并未真正变为 `$$()`。
-
-本次已经直接验证仓库源码，两处均改为：
-
-`$$('#paletteMenu .palette-option').forEach(...)`
-
-并增加 Pages workflow 静态检查：如果 JS 中出现单元素 `$()` 后直接调用 `.forEach`，部署任务会失败，防止同类错误再次上线。
-
-同时统一 `app.js / periodic.js / references.js` 的 module 版本参数，并更新静态资源版本，避免浏览器继续使用故障版本缓存。
-
-错误页提示保持为“页面初始化失败”，不再把任意前端运行错误误写为 DecompressionStream 问题。
-
-## 27. 待检查项
-
-- 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
-- impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
-- Pages 需确认仓库是否已启用 GitHub Actions deployment；
-- 响应式布局完成后需用至少 1920、1440、1024 和手机宽度检查。
+## 8. 当前界面与品牌约束
+
+- 正式网页入口：<https://plastocyanin.org/nmr-atlas/>；公开署名 hyphoon，联系邮箱 wuhaifeng@ustc.edu.cn。主站 Workshop 已以 `_projects/nmr-atlas.md` 收录，分类 reference / Reference Tool，不作为首页 featured 项目。
+- 当前代码将页面逻辑分为 `assets/core.js`、`assets/periodic.js`、`assets/references.js`、`assets/app.js`，由 `index.html` 加载；保持内部 ES module 引用版本与入口脚本一致，以免浏览器旧缓存导致页面初始化失败。
+- 独立工具页头不复用主站整行导航：`plastocyanin.` 链接主站，`NMR Atlas` 链接工具主页；`WORKSHOP / NMR ATLAS` breadcrumb 返回 Workshop。页尾品牌分别可点击。
+- 共用品牌默认深蓝灰 `#203139`，hover / active / focus 使用 `#355c7d` 与细下划线；`plastocyanin.` 的金色 o 和末尾圆点始终采用 `#b68c37`。NMR Atlas 字样整体为深蓝灰，无额外金色字母。详见主仓库 `docs/SITE_STYLE_GUIDE.md`。
+- 一般 `.container` 最大宽度 1440px，宽幅 `.atlas-wide` 最大宽度 1680px；周期表的背景使用站点统一 `--bg`，分隔线宽度对齐对应内容容器。
+- 周期表配色通过一个带当前名称、三色预览和展开箭头的 palette picker 切换；点击外部或 Escape 关闭，通过 `localStorage` 保存。正式方案为：Reference / Wave；Scientific / JACS、Muted、Grayscale；Prism / Pastel、Classic；Matplotlib / Set2；Continuous / Cividis。
+- Wave 使用 table400.tex 的配色：元素底色 `#2E58A4`、文字 `#FFFFFF`，I = 1/2 底色 `#FFC000`、文字 `#002060`，I > 1/2 底色 `#E3DED4`、文字 `#002060`，轮廓 `#002060`。JACS 采用 `#DCE8F0 / #E9D8AF / #E5E7E8`、Muted 采用 `#DCE5EC / #E8DDD2 / #DFE6E1` 等适合高密度文字阅读的浅色映射；其余实际色值以代码为准。Atlas / Mineral / Mono 等旧方案已停用。
+- Solvent Signals：两列选择器、无框结构图、formula 与 residual protonated isotopologue/species 说明，¹H/¹³C 棒状图支持滚轮围绕指针缩放和双击重置；不保留没有信息含量的底部 DATA NOTES。
+- Impurity Signals：长列表不再折叠；每条信号按上一节的两行格式展示。保留 sticky header / first column、可读字号与水平滚动。
+
+## 9. 现有数据与检查边界
+
+- 周期表与核种比较保留来自 `table400.tex` 的核种数据；¹H 频率范围为 1 kHz–2.0 GHz，B₀ 与频率双向联动，公共 `Δδ / ppm` 默认为 1，`Δν / Hz = Δδ / ppm × ν₀ / MHz`。
+- Solvent Signals 数据依据 Cambridge Isotope Laboratories, *NMR Solvent Data Chart*；Impurity Signals 的位移依据 Babij, N. R. et al., *Org. Process Res. Dev.* **2016**, 20, 661–667，DOI: `10.1021/acs.oprd.5b00417` 及其补充资料。结构、formula、CAS 或 SMILES 如采用 PubChem 等外部元数据，不得与论文实测数据混为同一来源。
+- 静态页面通过 `.github/workflows/pages.yml` 进行 `node --check`、`$()` 误用 `.forEach` 的检查与 Pages 发布；各 JS 模块必须具有一致的查询版本。Actions 成功与实际页面加载、科学数值核验应分别记录。
+- 待核对：部分 deuterated formula / residual isotopologue 的精确归属、杂质 formula/CAS/结构来源；核素数据的数值精度与低场单位；至少 1920 / 1440 / 1024 / 手机宽度下的布局；实际浏览器的 palette picker、hover inspector、标签筛选、核种比较与谱图缩放；Pages 最新提交及公开页面加载。
