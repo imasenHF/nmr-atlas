@@ -82,7 +82,7 @@ function makeElement(e,p={}){
     c.className=`isotope-cell ${cls}`;c.dataset.spinClass=cls;c.dataset.symbol=e.symbol;c.dataset.mass=i.mass;c.dataset.gamma=i.gamma;
     c.dataset.search=`${i.mass}${e.symbol} ${e.name} ${e.symbol}`.toLowerCase();
     c.innerHTML=`<span class="mass"><sup>${i.mass||''}</sup>${e.symbol}</span><span class="line abundance">${displayNumber(i.abundance,2)}</span><span class="line freq">${f==null?'—':Number(f).toFixed(2)}</span><span class="line recept">${compactNumber(i.receptivity)}</span>`;
-    c.title=`${i.mass}${e.symbol} · abundance ${displayNumber(i.abundance,2)}% · ${frequencyText(frequencyMhz(i.gamma))} · R ${compactNumber(i.receptivity)}`;
+    c.setAttribute('aria-label',`${i.mass}${e.symbol} · abundance ${displayNumber(i.abundance,2)}% · ${frequencyText(frequencyMhz(i.gamma))} · R ${compactNumber(i.receptivity)}`);
     if(cls==='unknown')c.disabled=true;
     else{
       bindHover(c,e,i);

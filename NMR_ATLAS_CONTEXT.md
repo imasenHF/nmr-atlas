@@ -77,7 +77,7 @@ Spin filter 必须作用于核素级：
 
 ### 2.6 元素/核素局部信息
 
-元素或核素 hover 约 300–400 ms 后显示局部 inspector，不放大整张周期表；离开元素和 inspector 后短延迟关闭。
+元素或核素 hover 约 300–400 ms 后显示局部 inspector，不放大整张周期表；离开元素和 inspector 后短延迟关闭。核素格不使用浏览器原生 `title` 提示，保留可访问名称（`aria-label`），悬浮时只显示自定义 inspector。
 
 Inspector 清晰显示该元素所有可用核素的：
 
