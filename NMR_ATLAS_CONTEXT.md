@@ -544,7 +544,36 @@ NMR Atlas 采用类似 SpinFront 的独立工具页头，不显示主站全局�
 
 这样磁场控制、核种比较和 Solvent Signals 等常规模块与超宽周期表/杂质矩阵之间的宽度差缩小，但仍保留两个层级。
 
-## 23. 待检查项
+
+## 24. 2026-10-08 周期表配色选择器
+
+周期表配色不再使用横向平铺按钮。当前改为紧凑的下拉式 palette picker，按钮只显示当前配色名称、三色预览和展开箭头；点击后显示分组菜单。
+
+当前提供 8 套方案：
+
+Reference：
+- Wave：直接来自 `table400.tex`。
+
+Scientific：
+- JACS；
+- Muted；
+- Grayscale。
+
+Prism：
+- Pastel；
+- Classic。
+
+Matplotlib：
+- Set2。
+
+Continuous：
+- Cividis。
+
+除 Wave 外，其余方案的色相来源参考 SpinPlot 已有 palette，但根据周期表高信息密度场景使用更浅的 tint 映射，避免将 SpinPlot 曲线颜色直接作为大面积方格底色。
+
+配色选择继续写入 `localStorage`，刷新页面后保留上次选择。菜单支持点击外部或 Escape 关闭。
+
+## 25. 待检查项
 
 - 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
 - impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
