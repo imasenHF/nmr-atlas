@@ -198,7 +198,7 @@ function applyPalette(key){
   localStorage.setItem('nmr-atlas-palette',p.key);
   $('#paletteName').textContent=p.label;
   $('#paletteMini').innerHTML=p.colors.map(c=>`<i style="background:${c}"></i>`).join('');
-  $('#paletteMenu .palette-option').forEach(b=>b.classList.toggle('active',b.dataset.palette===p.key));
+  $$('#paletteMenu .palette-option').forEach(b=>b.classList.toggle('active',b.dataset.palette===p.key));
 }
 export function initPalette(){
   const allowed=new Set(PALETTES.map(x=>x.key));
@@ -212,7 +212,7 @@ export function initPalette(){
   }).join('');
   applyPalette(saved);
   button.onclick=()=>{const open=menu.hidden;menu.hidden=!open;button.setAttribute('aria-expanded',String(open))};
-  $('#paletteMenu .palette-option').forEach(b=>b.onclick=()=>{applyPalette(b.dataset.palette);menu.hidden=true;button.setAttribute('aria-expanded','false')});
+  $$('#paletteMenu .palette-option').forEach(b=>b.onclick=()=>{applyPalette(b.dataset.palette);menu.hidden=true;button.setAttribute('aria-expanded','false')});
   document.addEventListener('click',e=>{if(!$('#paletteSwitch').contains(e.target)){menu.hidden=true;button.setAttribute('aria-expanded','false')}});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){menu.hidden=true;button.setAttribute('aria-expanded','false')}});
 }
