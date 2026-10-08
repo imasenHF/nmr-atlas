@@ -90,7 +90,7 @@ Inspector 清晰显示该元素所有可用核素的：
 
 点击 isotope 直接加入/移出 Nuclei Comparison；点击元素主体添加当前自旋筛选条件下天然丰度最高的可用 NMR isotope。
 
-核素被选中后仍在 Nuclei Comparison 中列示；周期表的选中核素使用底部 3px 内描边，并使用当前 palette 的 `--pt-accent` 强调色，不再使用固定金色。hover 时同时显示当前方案的强调色描边，保持选中与悬浮可区分；其余核素背景颜色不变。
+核素被选中后在 Nuclei Comparison 中列示，同时其周期表格持续显示当前 palette 的 `--pt-accent` 颜色的 2px 内描边；再次点击同一核素或从比较表移除时立即取消该选中描边。未选中核素在 hover 时仅短暂显示 1px 的同色描边，离开后消失；选中描边不因移开鼠标而消失。核素背景颜色不改变，任何方案都不使用固定金色的选中标记。
 
 ## 3. Nuclei Comparison
 
