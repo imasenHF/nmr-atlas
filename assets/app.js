@@ -1,6 +1,6 @@
-import{$,state,loadData}from'./core.js?v=20261008-palette4';
-import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,initPalette,restoreUrl,setField,renderComparison}from'./periodic.js?v=20261008-palette4';
-import{initSolvents,initImpurities}from'./references.js?v=20261008-palette4';
+import{$,state,loadData}from'./core.js?v=20261008-layout5';
+import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,initPalette,restoreUrl,setField,renderComparison}from'./periodic.js?v=20261008-layout5';
+import{initSolvents,initImpurities}from'./references.js?v=20261008-layout5';
 try{
   await loadData();
   restoreUrl();
