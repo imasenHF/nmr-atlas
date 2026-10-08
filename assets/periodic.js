@@ -1,4 +1,4 @@
-import{$,$$,state,elements,gammaH,MHZ_MIN,MHZ_MAX,groupMapSP,fmt,displayNumber,compactNumber,frequencyMhz,currentTableUnit,frequencyInUnit,frequencyText,mhzToSlider,sliderToMhz,nuclideLabel,parseNumber}from'./core.js?v=20261008-workshop2';
+import{$,$$,state,elements,gammaH,MHZ_MIN,MHZ_MAX,groupMapSP,fmt,displayNumber,compactNumber,frequencyMhz,currentTableUnit,frequencyInUnit,frequencyText,mhzToSlider,sliderToMhz,nuclideLabel,parseNumber}from'./core.js?v=20261008-palettepicker1';
 
 const presets=[1,5,20,43,60,80,100,300,400,500,600,800,1000,1200];
 const fullPosition=e=>{const col=Math.round(Number(e.x)/2.618)+1,y=Number(e.y);let row;if(y>-14)row=Math.round(-y/2.618)+2;else if(y>-17.5)row=9;else row=10;return{col,row,period:row-1}};
