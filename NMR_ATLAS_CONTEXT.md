@@ -450,7 +450,36 @@ Wave 不再使用网页自行拟定的近似色，直接采用 `table400.tex` �
 
 第二行占用该 resonance cell 的完整可用宽度，不再与 assignment 强制三列同行。
 
-## 17. 待检查项
+
+## 18. 2026-10-08 说明文字精简与配色调整
+
+### 页面说明文字
+
+- 首页标题下方的总括性说明句删除，不再重复解释 NMR Atlas 功能范围。
+- 页面底部 DATA NOTES 整块删除；数据来源继续保留在各功能模块附近，不再额外重复汇总。
+- Solvent Signals 标题右侧说明改为：`Residual ¹H 信号来自于未完全氘代的同位素物种。`
+
+### JACS / Muted 配色
+
+保留 SpinPlot 中 JACS 与 prism_muted 的色相来源，但不再把 SpinPlot 曲线色直接作为大面积周期表底色。周期表需要更浅、更适合高密度文字阅读的 tint 版本。
+
+JACS：
+- element: `#DCE8F0`
+- I = 1/2: `#E9D8AF`
+- I > 1/2: `#E5E7E8`
+- outline: `#8EA6B6`
+- accent: `#1F5A85`
+
+Muted：
+- element: `#DCE5EC`
+- I = 1/2: `#E8DDD2`
+- I > 1/2: `#DFE6E1`
+- outline: `#96A7A1`
+- accent: `#56888A`
+
+两套方案均使用深蓝灰正文文字，避免此前深色块、棕色块和深灰块同时出现导致周期表视觉过重。
+
+## 19. 待检查项
 
 - 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
 - impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
