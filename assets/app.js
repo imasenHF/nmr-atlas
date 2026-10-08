@@ -1,6 +1,6 @@
-import{$,state,loadData}from'./core.js?v=20261008-palettepicker2';
-import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,initPalette,restoreUrl,setField,renderComparison}from'./periodic.js?v=20261008-palettepicker2';
-import{initSolvents,initImpurities}from'./references.js?v=20261008-palettepicker2';
+import{$,state,loadData}from'./core.js?v=20261008-palettepicker3';
+import{initPresets,renderPeriodic,initFilters,initComparison,initPeriodicEvents,initPalette,restoreUrl,setField,renderComparison}from'./periodic.js?v=20261008-palettepicker3';
+import{initSolvents,initImpurities}from'./references.js?v=20261008-palettepicker3';
 try{
   await loadData();
   restoreUrl();
