@@ -573,7 +573,26 @@ Continuous：
 
 配色选择继续写入 `localStorage`，刷新页面后保留上次选择。菜单支持点击外部或 Escape 关闭。
 
-## 25. 待检查项
+
+## 26. 2026-10-08 配色选择器运行故障修复
+
+新增下拉式 palette picker 后，页面出现 `$(...).forEach is not a function` / palette 初始化失败，导致 `app.js` 的统一初始化流程中断，动态数据区域不再渲染。
+
+根因：
+
+- `$()` 是 `querySelector`，返回单个 Element；
+- `$()` 是 `querySelectorAll` 的数组封装；
+- palette picker 中两处代码误写为 `$('#paletteMenu .palette-option').forEach(...)`，对单个 Element 调用 `forEach`。
+
+已修正为：
+
+`$('#paletteMenu .palette-option').forEach(...)`
+
+同时统一 `app.js / periodic.js / references.js` 对 `core.js` 的版本查询参数，避免同一 ES module 因不同 query string 被浏览器视为不同模块实例，造成 state / data 分裂。
+
+错误页提示也改为“页面初始化失败”，不再把所有运行错误误写为 DecompressionStream 问题。
+
+## 27. 待检查项
 
 - 部分 solvent 的 deuterated formula / residual isotopologue 需要逐项确认；
 - impurity formula / CAS / local structure metadata 目前不全部存在于文献数据中，需区分外部元数据；
