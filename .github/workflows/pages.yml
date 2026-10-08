@@ -46,12 +46,12 @@ jobs:
           for (const file of files) {
             const source = fs.readFileSync(file, 'utf8');
             for (const hit of source.matchAll(invalid)) {
-              const lineNo = source.slice(0, hit.index).split('\\n').length;
+              const lineNo = source.slice(0, hit.index).split('\n').length;
               bad.push(`${file}:${lineNo}: ${hit[0]}`);
             }
           }
           if (bad.length) {
-            console.error('Single-element selector used with forEach:\\n' + bad.join('\\n'));
+            console.error('Single-element selector used with forEach:\n' + bad.join('\n'));
             process.exit(1);
           }
           NODE
